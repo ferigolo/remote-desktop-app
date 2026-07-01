@@ -1,16 +1,12 @@
 #include "api.hpp"
 
-bool MediaEngine::initialize()
-{
-  std::println("⚙️ [C++26 Core] Graphic and Media engines initialized at main thread.");
-  return true;
-}
-
 bool start_media_engine()
 {
   try
   {
-    return MediaEngine::initialize();
+    if (!g_engine)
+      g_engine = new MediaEngine();
+    return g_engine->initialize(); // Opens a new window accelerated by the hardware (GPU) and starts the render loop
   }
   catch (const std::exception &e)
   {
