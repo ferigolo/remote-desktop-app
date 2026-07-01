@@ -1,12 +1,25 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 
 export default function Home() {
   const [status, setStatus] = useState<"Inativo" | "Conectando" | "Online">(
     "Inativo",
   );
+
+  useEffect(() => {
+    // Register listener for 'engine_stopped'
+    const unlisten = listen("engine_stopped", () => {
+      console.log("Received event from Rust: the window was closed");
+      setStatus("Inativo");
+    });
+
+    return () => {
+      unlisten.then((f) => f());
+    };
+  }, []);
 
   const handleStartEngine = async () => {
     try {

@@ -1,18 +1,19 @@
 #include "api.hpp"
 #include <thread>
 
-bool start_media_engine()
+bool start_media_engine(EventCallback onCloseCallback)
 {
   try
   {
-    if (!g_engine)
-      g_engine = new MediaEngine();
+    if (!gEngine)
+      gEngine = new MediaEngine();
 
     // Unlocks Tauri UI imediatelly
-    std::thread([]()
-                { g_engine->initialize(); }) // Opens a new window accelerated by the hardware (GPU) and starts the render loop
+    std::thread([onCloseCallback]()
+                { gEngine->initialize();
+                onCloseCallback(); }) // Opens a new window accelerated by the hardware (GPU) and starts the render loop
         .detach();
-    
+
     return true;
   }
   catch (const std::exception &e)
