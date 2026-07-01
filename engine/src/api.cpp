@@ -1,4 +1,5 @@
 #include "api.hpp"
+#include <thread>
 
 bool start_media_engine()
 {
@@ -6,7 +7,13 @@ bool start_media_engine()
   {
     if (!g_engine)
       g_engine = new MediaEngine();
-    return g_engine->initialize(); // Opens a new window accelerated by the hardware (GPU) and starts the render loop
+
+    // Unlocks Tauri UI imediatelly
+    std::thread([]()
+                { g_engine->initialize(); }) // Opens a new window accelerated by the hardware (GPU) and starts the render loop
+        .detach();
+    
+    return true;
   }
   catch (const std::exception &e)
   {

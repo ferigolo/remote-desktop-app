@@ -6,7 +6,7 @@
 class MediaEngine
 {
 public:
-  [[nodiscard]] bool initialize(); // nodiscard -> compiler flag to set a warning if return value was not used
+  bool initialize();
 };
 
 // Disable C++ name mangling to provide C linkage.

@@ -4,7 +4,7 @@ unsafe extern "C" {
 
 #[tauri::command]
 fn start_engine() -> Result<bool, String> {
-    println!("🦀[Rust Tauri] Command received from UI. Calling C++...");
+    println!("🦀 [Rust Tauri] Command received from UI. Calling C++...");
     // Because we are calling an external code not managed by Rust, it needs an unsafe block
     let success = unsafe { start_media_engine() };
     

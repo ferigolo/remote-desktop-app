@@ -12,6 +12,7 @@ MediaEngine::~MediaEngine()
 
 bool MediaEngine::initialize()
 {
+  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
   {
     std::println(stderr, "❌ [CoreEngine] Error initializing SDL: {}", SDL_GetError());
