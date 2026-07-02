@@ -12,7 +12,10 @@ MediaEngine::~MediaEngine()
 
 bool MediaEngine::initialize()
 {
+  SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
+  SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland,x11");
   SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
   {
     std::println(stderr, "❌ [CoreEngine] Error initializing SDL: {}", SDL_GetError());
@@ -22,7 +25,7 @@ bool MediaEngine::initialize()
   window = SDL_CreateWindow("Remote Desktop", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_MAXIMIZED);
   if (!window)
   {
-    std::println(stderr, "❌ [CoreEngine] Erro ao criar janela: {}", SDL_GetError());
+    std::println(stderr, "❌ [CoreEngine] Error creating window: {}", SDL_GetError());
     cleanup();
     return false;
   }
@@ -30,6 +33,15 @@ bool MediaEngine::initialize()
   // SDL_RENDERER_ACCELERATED -> ensures GPU use
   // SDL_RENDERER_PRESENTVSYNC -> locks the renderer into monitor framerate
   renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
+  if (!renderer)
+  {
+    std::println("⚠️ [CoreEngine] Accelerated renderer failed, trying Software...");
+    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+  }
+  else
+    std::println("🚀 [C++26 Core] GPU accelerated window created successfully");
+
   if (!renderer)
   {
     std::println(stderr, "❌ [CoreEngine] Error creating GPU renderer: {}", SDL_GetError());
@@ -37,8 +49,12 @@ bool MediaEngine::initialize()
     return false;
   }
 
-  std::println("🚀 [C++26 Core] GPU accelerated window created successfully");
   is_running = true;
+
+  capturer = ScreenCapturer::create();
+  capturer->start([](const VideoFrame &frame)
+                  { static unsigned int count = 0;
+                     std::println("Got frame {}!", ++count); });
   render_loop();
 
   return true;
