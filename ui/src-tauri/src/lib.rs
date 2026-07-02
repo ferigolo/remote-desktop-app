@@ -1,47 +1,49 @@
-use std::sync::Mutex;
 use tauri::{AppHandle, Emitter};
-
-// Global state for storing the application controller
-static APP_HANDLE: Mutex<Option<AppHandle>> = Mutex::new(None);
-
-// The callback C++ will call
-extern "C" fn on_engine_close() {
-  println!("🦀 [Rust Tauri] Got a signal from C++: Window was closed.");
-  
-  // Emits event to Next.js
-  if let Ok(guard) = APP_HANDLE.lock() {
-      if let Some(app) = guard.as_ref() {
-          let _ = app.emit("engine_stopped", ()); 
-      }
-  }
-}
-
-unsafe extern "C" {
-    fn start_media_engine(cb: extern "C" fn()) -> bool;
-}
+use tauri_plugin_shell::{ShellExt, process::CommandEvent};
 
 #[tauri::command]
 fn start_engine(app: AppHandle) -> Result<bool, String> {
-    println!("🦀 [Rust Tauri] Command received from UI. Calling C++...");
+    println!("🦀 [Rust Tauri] Command received from UI. Spawning C++ Sidecar...");
 
-    // Stores AppHandle so the callback can use it later
-    if let Ok(mut guard) = APP_HANDLE.lock() {
-        *guard = Some(app);
-    }
+    let sidecar_command = app
+        .shell()
+        .sidecar("core-engine")
+        .map_err(|e| format!("Failed to create sidecar command: {}", e))?;
 
-    // Because we are calling an external code not managed by Rust, it needs an unsafe block
-    let success = unsafe { start_media_engine(on_engine_close) };
-    
-    if success {
-        Ok(true)
-    } else {
-        Err("Failed to initialize C++ engine".to_string())
-    }
+    let (mut rx, mut _child) = sidecar_command
+        .spawn()
+        .map_err(|e| format!("Failed to spawn engine: {}", e))?;
+
+    tauri::async_runtime::spawn(async move {
+        while let Some(event) = rx.recv().await {
+            match event {
+                CommandEvent::Stdout(line) => {
+                    let line_str = String::from_utf8_lossy(&line);
+                    print!("🚀 [C++]: {}", line_str);
+                }
+                CommandEvent::Stderr(line) => {
+                    let line_str = String::from_utf8_lossy(&line);
+                    eprint!("[C++ ERROR]: {}", line_str);
+                }
+                CommandEvent::Terminated(payload) => {
+                    println!("🦀 [Rust Tauri] C++ Sidecar Terminated: {:?}", payload);
+                    let _ = app.emit("engine_stopped", ());
+                }
+                CommandEvent::Error(err) => {
+                    eprintln!("🦀 [Rust Tauri] Sidecar Error: {}", err);
+                }
+                _ => {}
+            }
+        }
+    });
+
+    Ok(true)
 }
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() {
   tauri::Builder::default()
+        .plugin(tauri_plugin_shell::init())
         .invoke_handler(tauri::generate_handler![start_engine])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

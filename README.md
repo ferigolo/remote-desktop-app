@@ -20,13 +20,13 @@ This layer acts as the application wrapper and orchestrates the user experience 
   - **UI/UX:** Renders the main dashboard, settings, device list, and floating control overlays.
   - **Session Persistence:** Securely stores cryptographic keys and IDs of previously connected devices (using Tauri's secure storage/SQLite) to enable rapid "one-click" reconnections.
   - **Signaling Orchestration:** Communicates with the external Signaling Server via WebSockets to initiate the connection handshake.
-  - **Bridge (IPC):** Uses Tauri commands to instruct the underlying Core Media Engine (e.g., "Start Capture", "Accept Connection", "Mute Mic").
+  - **Process Management & Bridge (IPC):** Spawns and manages the underlying Core Media Engine as a standalone process (Tauri Sidecar), using standard IPC (stdio/sockets) to instruct it (e.g., "Start Capture", "Accept Connection", "Mute Mic").
 
-### **2\. The Core Media Engine (Native C++)**
+### **2\. The Core Media Engine (Standalone C++ Sidecar)**
 
-This is the heart of the application, designed for absolute performance and minimal latency.
+This is the heart of the application, designed for absolute performance and minimal latency. It runs as a completely separate executable process to ensure maximum stability (crash isolation) and strict compliance with windowing systems' main-thread rendering requirements (such as Wayland and macOS).
 
-- **Technology:** Pure C++ utilizing OS-specific graphics and input APIs, linked with libwebrtc.
+- **Technology:** Pure C++ utilizing OS-specific graphics and input APIs, linked with libwebrtc. Compiled as a standalone executable.
 - **Responsibilities:**
   - **Peer-to-Peer Transport:** Manages the WebRTC connection directly via UDP.
   - **Host Mode (Transmitter):**

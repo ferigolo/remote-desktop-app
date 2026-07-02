@@ -6,16 +6,59 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 
+# CMake has the configuration packages for SDL2, so we use 'find_package'
 find_package(SDL2 REQUIRED) # Looks into /usr/lib or /usr/local/lib for SDL2
 include_directories(${SDL2_INCLUDE_DIRS}) # Injects SDL2 dirs as flags for the compiler find the header files
 
-add_library(core_engine SHARED 
-    src/api.cpp
-    src/api.hpp
-    src/CoreEngine.hpp
+set(SOURCE_FILES 
+    src/main.cpp 
     src/CoreEngine.cpp
 )
 
-target_compile_options(core_engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    message(STATUS "🐧 Linux system detected: Activating DBus and PipeWire support")
+    # Add the Linux capturer into SOURCE_FILES to compile
+    list(APPEND SOURCE_FILES src/capturers/LinuxCapturer.cpp) 
 
-target_link_libraries(core_engine PRIVATE ${SDL2_LIBRARIES}) # links the program and SDL2 bynaries. SDL2_LIBRARIES contains the exact path for the SDL2 .so on the system
+    # Find needed packages to run
+    # pkg-config -> terminal utility which knows exactly where apt installed each package
+    find_package(PkgConfig REQUIRED) # Checks if the pkg-config is installed in the system
+    # Because pkg-config is installed, we use it to find DBus and PipeWire (they are not part of the CMake modules)
+    pkg_check_modules(DBUS REQUIRED dbus-1) 
+    pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
+
+    # Where the headers of DBus and PipeWire are. So when we write '#include <pipewire/pipewire.h>' it does not crash
+    include_directories(${DBUS_INCLUDE_DIRS} ${PIPEWIRE_INCLUDE_DIRS})
+
+    # Tells linker where are the bynaries (.so) of these packages
+    link_directories(${DBUS_LIBRARY_DIRS} ${PIPEWIRE_LIBRARY_DIRS})
+
+    # Macro to C++ engine know we are running on Linux
+    add_compile_definitions(__linux__)
+    
+elseif(APPLE)
+    message(STATUS "🍎 MacOS system detected: Preparing ScreenCaptureKit support")
+    
+    find_library(SCREENCAPTUREKIT ScreenCaptureKit)
+    find_library(COREMEDIA CoreMedia)
+    find_library(FOUNDATION Foundation)
+    
+    target_link_libraries(core-engine PRIVATE 
+        ${SCREENCAPTUREKIT} 
+        ${COREMEDIA} 
+        ${FOUNDATION}
+    )
+endif()
+
+add_executable(core-engine ${SOURCE_FILES})
+
+target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
+
+target_link_libraries(core-engine PRIVATE ${SDL2_LIBRARIES})
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(core-engine PRIVATE ${DBUS_LIBRARIES} ${PIPEWIRE_LIBRARIES})
+endif()
+
+# Required by Rust's cmake crate to output the binary correctly
+install(TARGETS core-engine DESTINATION bin)

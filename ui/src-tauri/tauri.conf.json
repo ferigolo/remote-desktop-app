@@ -27,6 +27,9 @@
     "active": true,
     "targets": "all",
     "icon": [],
+    "externalBin": [
+      "binaries/core-engine"
+    ],
     "android": {
       "debugApplicationIdSuffix": ".debug"
     }
