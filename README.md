@@ -60,6 +60,14 @@ The codebase is organized to strictly separate the UI components from the native
 - `/ui/src-tauri/`: The Rust backend and Tauri configuration. This folder sits inside the `ui` directory as per Tauri's standard architecture, allowing standard NPM scripts (like `npm run dev`) to easily orchestrate both the frontend and backend servers.
 - `/ui/src-tauri/binaries/`: A staging folder used exclusively during the build process.
 
+### **Cross-Platform C++ Architecture (Platform Units)**
+
+To maintain a highly scalable codebase and prevent "Macro Spaghetti" (excessive `#ifdef` blocks), the native engine employs **Platform-Specific Compilation Units**:
+
+- **Core Logic:** Primary classes (like `CoreEngine.cpp`) remain 100% OS-agnostic (pure C++) and rely on abstract headers (e.g., `PlatformUtils.hpp`) to execute hardware-level operations.
+- **Platform Folders:** OS-specific implementations are strictly isolated into dedicated folders. For example, `src/utils/linux/` contains pure `.cpp` OpenGL/Linux code, while `src/utils/mac/` contains pure `.mm` Objective-C++/Metal code.
+- **CMake Orchestration:** The `CMakeLists.txt` selectively injects only the appropriate platform folder into the build tree based on the detected host OS. This ensures Linux compilers never encounter Apple-specific `.mm` files and vice-versa, guaranteeing perfect compile-time isolation and zero cross-platform leakage.
+
 **Automated Compilation (The Sidecar Pattern):**
 Tauri expects native executables ("Sidecars") to be placed in a specific folder and named with an exact target-triple suffix (e.g., `core-engine-x86_64-unknown-linux-gnu`) before bundling. To automate this without polluting the C++ source directory:
 
