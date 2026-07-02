@@ -1,9 +1,13 @@
 #include "CoreEngine.hpp"
 #include <print>
 #include <exception>
+#include <cstdio>
 
 int main()
 {
+    // Disable stdout buffering so prints are sent immediately over the IPC pipe to Rust
+    std::setvbuf(stdout, nullptr, _IONBF, 0);
+
     try
     {
         std::println("🚀 [C++ Engine] Starting standalone MediaEngine...");

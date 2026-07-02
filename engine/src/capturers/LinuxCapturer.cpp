@@ -1,36 +1,101 @@
-// This will only be compiled on Ubuntu
+#include "LinuxCapturer.hpp"
 
-#include "ScreenCapturer.hpp"
-#include <print>
-
-class LinuxCapturer : public ScreenCapturer
+bool LinuxCapturer::start(std::function<void(const VideoFrame &)> on_frame_received)
 {
-public:
-  LinuxCapturer() { std::println("🐧 [LinuxCapturer] Instantiated. Preparing XDG Portal and PipeWire..."); }
 
-  ~LinuxCapturer() override { stop(); }
+  std::println("🐧 [LinuxCapturer] Starting Wayland capture process...");
 
-  bool start(std::function<void(const VideoFrame &)> on_frame_received) override
-  {
-    std::println("🐧 [LinuxCapturer] Starting Wayland capture process...");
+  // TODO: 1. Comunicar com D-Bus para abrir o Pop-up de permissão
+  requestScreencastSession();
+  // TODO: 2. Conectar ao PipeWire usando o File Descriptor recebido
+  // TODO: 3. Iniciar o loop de receção de frames e chamar on_frame_received()
 
-    // TODO: 1. Comunicar com D-Bus para abrir o Pop-up de permissão
-    // TODO: 2. Conectar ao PipeWire usando o File Descriptor recebido
-    // TODO: 3. Iniciar o loop de receção de frames e chamar on_frame_received()
-
-    return true;
-  }
-
-  void stop() override
-  {
-    std::println("🐧 [LinuxCapturer] Capture stoped");
-  }
-};
-
-// Factory implementation
-#ifdef __linux__
-std::unique_ptr<ScreenCapturer> ScreenCapturer::create()
-{
-  return std::make_unique<LinuxCapturer>();
+  return true;
 }
-#endif
+
+void LinuxCapturer::stop()
+{
+  std::println("🐧 [LinuxCapturer] Capture stoped");
+}
+
+void LinuxCapturer::handleDBusError(DBusError *error, const char *context)
+{
+  if (dbus_error_is_set(error))
+  {
+    std::println(stderr, "❌ DBus error at [{}]: {}: {}", context, error->name, error->message);
+    dbus_error_free(error);
+  }
+}
+
+void LinuxCapturer::requestScreencastSession()
+{
+  DBusError error;
+  dbus_error_init(&error);
+
+  DBusConnection *conn = dbus_bus_get(DBUS_BUS_SESSION, &error);
+  if (!conn)
+  {
+    handleDBusError(&error, "Connection");
+    return;
+  }
+
+  DBusMessage *msg = dbus_message_new_method_call(
+      "org.freedesktop.portal.Desktop",    // Destiny
+      "/org/freedesktop/portal/desktop",   // Path
+      "org.freedesktop.portal.ScreenCast", // Interface
+      "CreateSession"                      // Method
+  );
+
+  if (!msg)
+  {
+    std::println(stderr, "❌ [LinuxCapture] Failed allocating memory for DBus message");
+    return;
+  }
+
+  DBusMessageIter iter, dict_iter;
+  dbus_message_iter_init_append(msg, &iter);
+  dbus_message_iter_open_container(&iter, DBUS_TYPE_ARRAY, "{sv}", &dict_iter);
+
+  // Helper lambda for adding {string: variant<string>} to dict
+  auto append_dict_string = [](DBusMessageIter* dict, const char* key, const char* val) {
+      DBusMessageIter entry, variant;
+      dbus_message_iter_open_container(dict, DBUS_TYPE_DICT_ENTRY, nullptr, &entry);
+      dbus_message_iter_append_basic(&entry, DBUS_TYPE_STRING, &key);
+      dbus_message_iter_open_container(&entry, DBUS_TYPE_VARIANT, "s", &variant);
+      dbus_message_iter_append_basic(&variant, DBUS_TYPE_STRING, &val);
+      dbus_message_iter_close_container(&entry, &variant);
+      dbus_message_iter_close_container(dict, &entry);
+  };
+
+  // Apps running outside Flatpak/Snap MUST provide these tokens so the portal can track the Request object
+  append_dict_string(&dict_iter, "session_handle_token", "remotedesktop_session");
+  append_dict_string(&dict_iter, "handle_token", "remotedesktop_request");
+
+  dbus_message_iter_close_container(&iter, &dict_iter);
+  std::println("🐧 [LinuxCapturer] D-Bus: Requesting new ScreenCast session...");
+  DBusMessage *reply = dbus_connection_send_with_reply_and_block(conn, msg, -1,
+                                                                 &error);
+  dbus_message_unref(msg);
+
+  if (!reply)
+  {
+    handleDBusError(&error, "CreateSession");
+    return;
+  }
+
+  const char *sessionHandlePath = nullptr;
+  if (dbus_message_get_args(reply, &error,
+                            DBUS_TYPE_OBJECT_PATH, &sessionHandlePath,
+                            DBUS_TYPE_INVALID))
+  {
+    std::println("✅ Sucessfully created session at: {}",
+                 sessionHandlePath);
+  }
+  else
+  {
+    handleDBusError(&error, "Reading response from CreateSession");
+  }
+
+  // Libera a mensagem de resposta
+  dbus_message_unref(reply);
+}
