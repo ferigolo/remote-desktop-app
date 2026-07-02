@@ -3,10 +3,33 @@
 #include <exception>
 #include <cstdio>
 
-int main()
+#include <QCoreApplication>
+#include <QtGlobal>
+#include <cstdio>
+
+void qtStdoutMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout, "%s\n", msg.toLocal8Bit().constData());
+    fflush(stdout);
+}
+
+int main(int argc, char *argv[])
 {
     // Disable stdout buffering so prints are sent immediately over the IPC pipe to Rust
     std::setvbuf(stdout, nullptr, _IONBF, 0);
+
+    // Redirects Qt logs to stdout
+    qInstallMessageHandler(
+        [](QtMsgType type, const QMessageLogContext &context, const QString &msg)
+        {
+            fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout,
+                    "%s\n",
+                    msg.toLocal8Bit().constData());
+            fflush(stdout);
+        });
+
+    // QCoreApplication is required for QEventLoop and QtDBus to function
+    QCoreApplication app(argc, argv);
 
     try
     {
