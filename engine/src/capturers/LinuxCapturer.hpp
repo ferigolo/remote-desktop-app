@@ -14,7 +14,13 @@ public:
   void stop() override;
 
   static void handleDBusError(DBusError *error, const char *context);
-  static void requestScreencastSession();
+  void requestScreencastSession();
+  void selectSources();
+  void startScreencast();
+
+private:
+  DBusConnection *conn;
+  const char *sessionHandlePath{};
 };
 
 // Factory implementation

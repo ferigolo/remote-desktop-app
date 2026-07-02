@@ -1,5 +1,5 @@
 #pragma once
-#include <SDL2/SDL.h>
+#include <SDL3/SDL.h>
 #include <atomic>
 #include "capturers/ScreenCapturer.hpp"
 
@@ -8,7 +8,7 @@ class MediaEngine
 public:
   MediaEngine();
   ~MediaEngine();
-  
+
   bool initialize();
 
 private:

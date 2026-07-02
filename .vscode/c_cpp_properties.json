@@ -9,7 +9,10 @@
             "compilerPath": "/usr/bin/gcc-16",
             "cStandard": "c23",
             "cppStandard": "gnu++26",
-            "intelliSenseMode": "linux-gcc-x64"
+            "intelliSenseMode": "linux-gcc-x64",
+            "compileCommands": [
+                "${workspaceFolder}/.vscode/compile_commands.json"
+            ]
         }
     ],
     "version": 4

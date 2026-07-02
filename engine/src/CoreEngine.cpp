@@ -1,4 +1,5 @@
 #include "CoreEngine.hpp"
+#include <SDL3/SDL.h>
 #include <print>
 #include <thread>
 #include <cmath>
@@ -22,7 +23,7 @@ bool MediaEngine::initialize()
     return false;
   }
 
-  window = SDL_CreateWindow("Remote Desktop", SDL_WINDOWPOS_CENTERED, SDL_WINDOWPOS_CENTERED, 1920, 1080, SDL_WINDOW_RESIZABLE | SDL_WINDOW_ALLOW_HIGHDPI | SDL_WINDOW_MAXIMIZED);
+  window = SDL_CreateWindow("Remote Desktop", 1920, 1080, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_MAXIMIZED);
   if (!window)
   {
     std::println(stderr, "❌ [CoreEngine] Error creating window: {}", SDL_GetError());
@@ -30,23 +31,20 @@ bool MediaEngine::initialize()
     return false;
   }
 
-  // SDL_RENDERER_ACCELERATED -> ensures GPU use
-  // SDL_RENDERER_PRESENTVSYNC -> locks the renderer into monitor framerate
-  renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  // SDL3 no longer uses flags for hardware acceleration/software in CreateRenderer.
+  // It handles it natively or you pass a specific driver string. Passing NULL gets the best default.
+  renderer = SDL_CreateRenderer(window, NULL);
+  SDL_SetRenderVSync(renderer, 1);
 
   if (!renderer)
   {
-    std::println("⚠️ [CoreEngine] Accelerated renderer failed, trying Software...");
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-  }
-  else
-    std::println("🚀 [C++26 Core] GPU accelerated window created successfully");
-
-  if (!renderer)
-  {
-    std::println(stderr, "❌ [CoreEngine] Error creating GPU renderer: {}", SDL_GetError());
+    std::println(stderr, "❌ [CoreEngine] Error creating renderer: {}", SDL_GetError());
     cleanup();
     return false;
+  }
+  else
+  {
+    std::println("🚀 [C++26 Core] Renderer created successfully");
   }
 
   is_running = true;
@@ -69,7 +67,7 @@ void MediaEngine::render_loop()
   {
     while (SDL_PollEvent(&event)) // poll until all events are handled
     {
-      if (event.type == SDL_QUIT)
+      if (event.type == SDL_EVENT_QUIT)
       {
         is_running = false;
         std::println("🛑 [CoreEngine] Quit window signal received");

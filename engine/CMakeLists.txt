@@ -5,10 +5,13 @@ project(CoreEngine VERSION 1.0)
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-# CMake has the configuration packages for SDL2, so we use 'find_package'
-find_package(SDL2 REQUIRED) # Looks into /usr/lib or /usr/local/lib for SDL2
-include_directories(${SDL2_INCLUDE_DIRS}) # Injects SDL2 dirs as flags for the compiler find the header files
+# We need to tell CMake to look /usr/local
+list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake" "/usr/local/lib/cmake/SDL3")
+
+find_package(SDL3 REQUIRED) # Looks into /usr/lib or /usr/local/lib for SDL3
+include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags for the compiler find the header files
 
 set(SOURCE_FILES 
     src/main.cpp 
@@ -30,7 +33,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     # Where the headers of DBus and PipeWire are. So when we write '#include <pipewire/pipewire.h>' it does not crash
     include_directories(${DBUS_INCLUDE_DIRS} ${PIPEWIRE_INCLUDE_DIRS})
 
-    # Tells linker where are the bynaries (.so) of these packages
+    # Tells linker where are the binaries (.so) of these packages
     link_directories(${DBUS_LIBRARY_DIRS} ${PIPEWIRE_LIBRARY_DIRS})
 
     # Macro to C++ engine know we are running on Linux
@@ -54,7 +57,7 @@ add_executable(core-engine ${SOURCE_FILES})
 
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
 
-target_link_libraries(core-engine PRIVATE ${SDL2_LIBRARIES})
+target_link_libraries(core-engine PRIVATE SDL3::SDL3)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(core-engine PRIVATE ${DBUS_LIBRARIES} ${PIPEWIRE_LIBRARIES})
