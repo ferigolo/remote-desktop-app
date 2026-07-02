@@ -18,17 +18,17 @@ include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags so the co
 
 set(SOURCE_FILES 
     src/main.cpp 
-    src/CoreEngine.mm
+    src/CoreEngine.cpp
     src/configurers/MediaEngineConfigurer.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "🐧 Linux system detected: Activating DBus and PipeWire support")
-    # Add the Linux capturer into SOURCE_FILES to compile
-    list(APPEND SOURCE_FILES src/capturers/LinuxCapturer.cpp) 
-    
-    # Force Linux compiler to treat .mm as standard C++ to avoid requiring gobjc++
-    set_source_files_properties(src/CoreEngine.mm PROPERTIES LANGUAGE CXX)
+    # Add the Linux capturer and platform utils into SOURCE_FILES to compile
+    list(APPEND SOURCE_FILES 
+        src/capturers/LinuxCapturer.cpp
+        src/utils/linux/PlatformUtils.cpp
+    )
 
     # Find needed packages to run
     # pkg-config -> terminal utility which knows exactly where apt installed each package
@@ -49,6 +49,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 elseif(APPLE)
     message(STATUS "🍎 MacOS system detected: Preparing ScreenCaptureKit support")
     
+    list(APPEND SOURCE_FILES src/utils/mac/PlatformUtils.mm)
+
     find_library(SCREENCAPTUREKIT ScreenCaptureKit)
     find_library(COREMEDIA CoreMedia)
     find_library(FOUNDATION Foundation)
