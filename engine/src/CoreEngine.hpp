@@ -19,4 +19,5 @@ private:
 
   void render_loop();
   void cleanup();
+  void printRendererInfo() const;
 };

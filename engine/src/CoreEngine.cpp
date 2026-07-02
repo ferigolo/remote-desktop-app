@@ -1,8 +1,11 @@
 #include "CoreEngine.hpp"
+#include "configurers/MediaEngineConfigurer.hpp"
 #include <SDL3/SDL.h>
 #include <print>
 #include <thread>
 #include <cmath>
+#include <string_view>
+#include <SDL3/SDL_opengl.h>
 
 MediaEngine::MediaEngine() : window(nullptr), renderer(nullptr), is_running(false) {}
 
@@ -13,9 +16,7 @@ MediaEngine::~MediaEngine()
 
 bool MediaEngine::initialize()
 {
-  SDL_SetHint(SDL_HINT_VIDEO_X11_FORCE_EGL, "1");
-  SDL_SetHint(SDL_HINT_VIDEODRIVER, "wayland,x11");
-  SDL_SetHint(SDL_HINT_VIDEO_X11_NET_WM_BYPASS_COMPOSITOR, "0");
+  MediaEngineConfigurer::configSDL();
 
   if (SDL_Init(SDL_INIT_VIDEO) < 0)
   {
@@ -42,11 +43,8 @@ bool MediaEngine::initialize()
     cleanup();
     return false;
   }
-  else
-  {
-    std::println("🚀 [C++26 Core] Renderer created successfully");
-  }
-
+  std::println(" [ Core] Renderer created successfully");
+  printRendererInfo();
   is_running = true;
 
   capturer = ScreenCapturer::create();
@@ -103,4 +101,30 @@ void MediaEngine::cleanup()
   }
   SDL_Quit();
   std::println("🧹 [CoreEngine] Released resources");
+}
+
+void MediaEngine::printRendererInfo() const
+{
+#ifndef NDEBUG
+  if (!renderer)
+    return;
+  const char *backendName = SDL_GetRendererName(renderer);
+  std::println(" [ Core] Using {} backend", backendName);
+
+  std::string_view backend(backendName);
+  if (backend == "opengl")
+  {
+    auto glGetStringFunc = (const GLubyte *(*)(GLenum))
+        SDL_GL_GetProcAddress("glGetString");
+
+    if (glGetStringFunc)
+    {
+      const char *gpuName = reinterpret_cast<const char *>(glGetStringFunc(GL_RENDERER));
+      const char *glVersion = reinterpret_cast<const char *>(glGetStringFunc(GL_VERSION));
+
+      std::println("\n🎮 Using GPU: {}", gpuName ? gpuName : "Unknown");
+      std::println("⚙️  OpenGL version: {}\n", glVersion ? glVersion : "Unknown");
+    }
+  }
+#endif
 }

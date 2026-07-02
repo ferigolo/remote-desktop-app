@@ -51,6 +51,24 @@ A lightweight backend service used only during the initial connection phase.
   - Relays ICE Candidates (Interactive Connectivity Establishment) for NAT traversal (using external STUN/TURN servers).
   - _Note: Once the P2P connection is established, the signaling server is bypassed for that session._
 
+## **Directory Structure & Build Pipeline**
+
+The codebase is organized to strictly separate the UI components from the native C++ Engine while maintaining an idiomatic and automated build process.
+
+- `/engine/`: Contains the raw C++ source code and CMake build scripts for the Core Media Engine.
+- `/ui/`: Contains the Next.js frontend code.
+- `/ui/src-tauri/`: The Rust backend and Tauri configuration. This folder sits inside the `ui` directory as per Tauri's standard architecture, allowing standard NPM scripts (like `npm run dev`) to easily orchestrate both the frontend and backend servers.
+- `/ui/src-tauri/binaries/`: A staging folder used exclusively during the build process.
+
+**Automated Compilation (The Sidecar Pattern):**
+Tauri expects native executables ("Sidecars") to be placed in a specific folder and named with an exact target-triple suffix (e.g., `core-engine-x86_64-unknown-linux-gnu`) before bundling. To automate this without polluting the C++ source directory:
+
+1. When running `cargo build` or `npx run tauri dev`, Tauri invokes `ui/src-tauri/build.rs`.
+2. The Rust `build.rs` script triggers `cmake` to compile the C++ engine natively from the `/engine/` folder.
+3. The resulting generic binary is automatically renamed with the correct target-triple and copied into the `ui/src-tauri/binaries/` staging directory.
+4. The Tauri bundler then seamlessly packages the application for the current OS and architecture.
+   *(Note: The `binaries/` staging folder is explicitly ignored by `.gitignore` to avoid tracking compiled assets).*
+
 ## **The WebRTC Topology**
 
 The system multiplexes four distinct data streams over a single WebRTC connection:

@@ -10,21 +10,21 @@ int main()
 
     try
     {
-        std::println("🚀 [C++ Engine] Starting standalone MediaEngine...");
-        
+        std::println(" [Engine] Starting standalone MediaEngine...");
+
         MediaEngine engine;
         if (!engine.initialize())
         {
-            std::println(stderr, "❌ [C++ Engine] Failed to initialize MediaEngine");
+            std::println(stderr, "❌ [ Engine] Failed to initialize MediaEngine");
             return 1;
         }
 
-        std::println("✅ [C++ Engine] Engine terminated gracefully.");
+        std::println("✅ [Engine] Engine terminated gracefully.");
         return 0;
     }
     catch (const std::exception &e)
     {
-        std::println(stderr, "❌ [C++ Engine] Fatal error: {}", e.what());
+        std::println(stderr, "❌ [Engine] Fatal error: {}", e.what());
         return 1;
     }
 }

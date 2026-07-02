@@ -6,16 +6,20 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+if(NOT CMAKE_BUILD_TYPE)
+    set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
+endif()
 
 # We need to tell CMake to look /usr/local
 list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake" "/usr/local/lib/cmake/SDL3")
 
 find_package(SDL3 REQUIRED) # Looks into /usr/lib or /usr/local/lib for SDL3
-include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags for the compiler find the header files
+include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags so the compiler can find the header files
 
 set(SOURCE_FILES 
     src/main.cpp 
     src/CoreEngine.cpp
+    src/configurers/MediaEngineConfigurer.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
