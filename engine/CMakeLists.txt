@@ -18,7 +18,7 @@ include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags so the co
 
 set(SOURCE_FILES 
     src/main.cpp 
-    src/CoreEngine.cpp
+    src/CoreEngine.mm
     src/configurers/MediaEngineConfigurer.cpp
 )
 
@@ -26,6 +26,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "🐧 Linux system detected: Activating DBus and PipeWire support")
     # Add the Linux capturer into SOURCE_FILES to compile
     list(APPEND SOURCE_FILES src/capturers/LinuxCapturer.cpp) 
+    
+    # Force Linux compiler to treat .mm as standard C++ to avoid requiring gobjc++
+    set_source_files_properties(src/CoreEngine.mm PROPERTIES LANGUAGE CXX)
 
     # Find needed packages to run
     # pkg-config -> terminal utility which knows exactly where apt installed each package

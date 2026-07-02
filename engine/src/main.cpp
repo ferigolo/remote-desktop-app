@@ -15,7 +15,7 @@ int main()
         MediaEngine engine;
         if (!engine.initialize())
         {
-            std::println(stderr, "❌ [ Engine] Failed to initialize MediaEngine");
+            std::println(stderr, "❌ [Engine] Failed to initialize MediaEngine");
             return 1;
         }
 

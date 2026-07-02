@@ -7,6 +7,12 @@
 #include <string_view>
 #include <SDL3/SDL_opengl.h>
 
+#ifdef __APPLE__
+#include <SDL3/SDL_metal.h>
+#import <Metal/Metal.h>
+#import <QuartzCore/QuartzCore.h>
+#endif
+
 MediaEngine::MediaEngine() : window(nullptr), renderer(nullptr), is_running(false) {}
 
 MediaEngine::~MediaEngine()
@@ -43,7 +49,7 @@ bool MediaEngine::initialize()
     cleanup();
     return false;
   }
-  std::println(" [ Core] Renderer created successfully");
+  std::println(" [Core] Renderer created successfully");
   printRendererInfo();
   is_running = true;
 
@@ -109,9 +115,11 @@ void MediaEngine::printRendererInfo() const
   if (!renderer)
     return;
   const char *backendName = SDL_GetRendererName(renderer);
-  std::println(" [ Core] Using {} backend", backendName);
+  std::println(" [Core] Using {} backend", backendName);
 
   std::string_view backend(backendName);
+
+  #ifdef __linux__
   if (backend == "opengl")
   {
     auto glGetStringFunc = (const GLubyte *(*)(GLenum))
@@ -126,5 +134,20 @@ void MediaEngine::printRendererInfo() const
       std::println("⚙️  OpenGL version: {}\n", glVersion ? glVersion : "Unknown");
     }
   }
+  #elif defined(__APPLE__)
+  if (backend == "metal")
+  {
+    SDL_MetalView view = SDL_Metal_CreateView(window);
+    CAMetalLayer *layer = (__bridge CAMetalLayer *)SDL_Metal_GetLayer(view);
+
+    if (layer && layer.device)
+    {
+      id<MTLDevice> device = layer.device;
+      const char *gpuName = [device.name UTF8String];
+      std::println("🍎 Maped GPU (Metal): {}", gpuName);
+    }
+    SDL_Metal_DestroyView(view);
+  }
+  #endif
 #endif
 }
