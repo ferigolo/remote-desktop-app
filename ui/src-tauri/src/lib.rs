@@ -19,7 +19,7 @@ fn start_engine(app: AppHandle) -> Result<bool, String> {
             match event {
                 CommandEvent::Stdout(line) => {
                     let line_str = String::from_utf8_lossy(&line);
-                    print!("🚀 [C++]: {}", line_str);
+                    print!("🚀 [Engine]: {}", line_str);
                 }
                 CommandEvent::Stderr(line) => {
                     let line_str = String::from_utf8_lossy(&line);

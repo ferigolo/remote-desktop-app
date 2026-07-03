@@ -7,12 +7,6 @@
 #include <QtGlobal>
 #include <cstdio>
 
-void qtStdoutMessageHandler(QtMsgType type, const QMessageLogContext &context, const QString &msg)
-{
-    fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout, "%s\n", msg.toLocal8Bit().constData());
-    fflush(stdout);
-}
-
 int main(int argc, char *argv[])
 {
     // Disable stdout buffering so prints are sent immediately over the IPC pipe to Rust
@@ -22,6 +16,7 @@ int main(int argc, char *argv[])
     qInstallMessageHandler(
         [](QtMsgType type, const QMessageLogContext &context, const QString &msg)
         {
+            (void)context;
             fprintf(type == QtCriticalMsg || type == QtFatalMsg ? stderr : stdout,
                     "%s\n",
                     msg.toLocal8Bit().constData());
@@ -33,21 +28,21 @@ int main(int argc, char *argv[])
 
     try
     {
-        std::println(" [Engine] Starting standalone MediaEngine...");
+        std::println(" Starting standalone MediaEngine...");
 
         MediaEngine engine;
         if (!engine.initialize())
         {
-            std::println(stderr, "❌ [Engine] Failed to initialize MediaEngine");
+            std::println(stderr, "❌ Failed to initialize MediaEngine");
             return 1;
         }
 
-        std::println("✅ [Engine] Engine terminated gracefully.");
+        std::println("✅ Engine terminated gracefully.");
         return 0;
     }
     catch (const std::exception &e)
     {
-        std::println(stderr, "❌ [Engine] Fatal error: {}", e.what());
+        std::println(stderr, "❌ Fatal error: {}", e.what());
         return 1;
     }
 }

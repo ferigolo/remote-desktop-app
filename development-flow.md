@@ -43,7 +43,7 @@ Feeding the Phase 2 graphics pipeline with real local screen data using zero-cop
 
 ## **Phase 4: Transport and Signaling**
 
-Separating the "mirror effect" between two distinct machines over the network.**What to build:**
+Separating the "mirror effect" between two distinct machines over the network. **What to build:**
 
 1. Signaling Server in Python (_asyncio_ \+ _websockets_).
 2. Integration of libwebrtc into the C++ code.

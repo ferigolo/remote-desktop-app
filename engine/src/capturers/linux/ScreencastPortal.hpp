@@ -9,7 +9,7 @@ struct ScreencastResult
 {
   bool success = false;
   uint32_t node_id = 0;
-  // We will add the PipeWire file descriptor later when implementing PipeWire
+  int fd = -1;
 };
 
 class ScreencastPortal : public QObject
@@ -18,25 +18,26 @@ class ScreencastPortal : public QObject
 
 public:
   explicit ScreencastPortal(QObject *parent = nullptr);
-
-  // Negotiates the entire Screencast flow and returns the PipeWire Node ID
-  ScreencastResult negotiateScreencast();
-  void createSession();
-  void selectSources();
+  bool negotiateScreencast();
+  bool openPipeWireRemote();
 
 private slots:
   // Slot that receives the Response signal from the Portal
   void onPortalResponse(uint responseCode, const QVariantMap &results);
 
 private:
-  QString m_sessionPath;
+  QString sessionPath;
 
   // State variables for waiting on responses
-  bool m_waitingForResponse;
-  uint m_lastResponseCode;
-  QVariantMap m_lastResults;
+  bool waitingForResponse;
+  uint lastResponseCode;
+  QVariantMap lastResults;
   ScreencastResult finalResult{};
 
   // Helper to send a method call and wait for its associated Response signal
   bool callAndAwaitResponse(const QString &method, const QVariantMap &options);
+
+  // Negotiates the entire Screencast flow and returns the PipeWire Node ID
+  void createSession();
+  void selectSources();
 };
