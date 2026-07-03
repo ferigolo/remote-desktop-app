@@ -6,6 +6,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QUuid>
+#include <unistd.h>
 
 ScreencastPortal::ScreencastPortal(QObject *parent)
     : QObject(parent), waitingForResponse(false), lastResponseCode(1)
@@ -147,18 +148,21 @@ bool ScreencastPortal::negotiateScreencast()
 
     // Parse the node_id from the streams array
     QVariant streamsVar = lastResults["streams"];
+    qInfo() << "🐧 [ScreencastPortal] lastResults keys:" << lastResults.keys();
+    qInfo() << "🐧 [ScreencastPortal] streamsVar typeName:" << streamsVar.typeName() << "isNull:" << streamsVar.isNull();
 
     // The response is an array of structs: a(ua{sv})
     // In QtDBus, this often comes out as QDBusArgument
     if (streamsVar.canConvert<QDBusArgument>())
     {
+        qInfo() << "🐧 [ScreencastPortal] streamsVar can convert to QDBusArgument";
         const QDBusArgument &arg = streamsVar.value<QDBusArgument>();
 
         arg.beginArray();
         while (!arg.atEnd())
         {
             arg.beginStructure();
-            uint nodeId;
+            uint nodeId = 0; // Tells which screen or window the user chose
             QVariantMap streamDetails;
             arg >> nodeId >> streamDetails;
             arg.endStructure();
@@ -169,10 +173,15 @@ bool ScreencastPortal::negotiateScreencast()
         }
         arg.endArray();
     }
+    else
+    {
+        qInfo() << "❌ [ScreencastPortal] streamsVar COULD NOT convert to QDBusArgument";
+    }
 
     return finalResult.node_id != 0;
 }
 
+// Requests a File Descriptor to DBus
 bool ScreencastPortal::openPipeWireRemote()
 {
     QDBusMessage msg = QDBusMessage::createMethodCall(
@@ -194,7 +203,7 @@ bool ScreencastPortal::openPipeWireRemote()
         return false;
     }
 
-    finalResult.fd = reply.value().fileDescriptor();
+    finalResult.fd = dup(reply.value().fileDescriptor());
     qInfo() << "🔑 [ScreencastPortal] Success! Received PipeWire File Descriptor:" << finalResult.fd;
     finalResult.success = (finalResult.node_id != 0 && finalResult.fd != -1);
 

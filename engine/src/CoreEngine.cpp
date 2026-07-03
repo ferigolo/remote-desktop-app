@@ -89,6 +89,9 @@ void MediaEngine::render_loop()
 
 void MediaEngine::cleanup()
 {
+  if (capturer)
+    capturer.reset();
+    
   if (renderer)
   {
     SDL_DestroyRenderer(renderer);
@@ -99,8 +102,11 @@ void MediaEngine::cleanup()
     SDL_DestroyWindow(window);
     window = nullptr;
   }
-  SDL_Quit();
-  std::println("🧹 [CoreEngine] Released resources");
+  if (SDL_WasInit(0) != 0)
+  {
+    SDL_Quit();
+    std::println("🧹 [CoreEngine] Released resources");
+  }
 }
 
 void MediaEngine::printRendererInfo() const
@@ -108,7 +114,7 @@ void MediaEngine::printRendererInfo() const
 #ifndef NDEBUG
   if (!renderer)
     return;
-  
+
   const char *backendName = SDL_GetRendererName(renderer);
   std::println(" [Core] Using {} backend", backendName);
 

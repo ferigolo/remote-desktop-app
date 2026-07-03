@@ -27,9 +27,10 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     message(STATUS "🐧 Linux system detected: Activating DBus and PipeWire support")
     # Add the Linux capturer and platform utils into SOURCE_FILES to compile
     list(APPEND SOURCE_FILES 
-    src/capturers/linux/ScreencastPortal.cpp
-        src/capturers/LinuxCapturer.cpp
+        src/capturers/linux/PipeWireClient.cpp
+        src/capturers/linux/ScreencastPortal.cpp
         src/utils/linux/PlatformUtils.cpp
+        src/capturers/LinuxCapturer.cpp
     )
 
     find_package(Qt6 COMPONENTS Core DBus REQUIRED)

@@ -6,7 +6,9 @@
                 "${workspaceFolder}/**",
                 "/usr/include/x86_64-linux-gnu/qt6/QtDBus",
                 "/usr/include/x86_64-linux-gnu/qt6",
-                "/usr/include/x86_64-linux-gnu/qt6/QtCore"
+                "/usr/include/x86_64-linux-gnu/qt6/QtCore",
+                "/usr/include/spa-0.2",
+                "/usr/include/pipewire-0.3"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc-16",

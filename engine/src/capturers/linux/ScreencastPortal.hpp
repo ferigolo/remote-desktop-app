@@ -20,6 +20,7 @@ public:
   explicit ScreencastPortal(QObject *parent = nullptr);
   bool negotiateScreencast();
   bool openPipeWireRemote();
+  const ScreencastResult& getResult() const { return finalResult; }
 
 private slots:
   // Slot that receives the Response signal from the Portal

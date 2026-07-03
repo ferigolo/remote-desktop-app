@@ -24,6 +24,7 @@ export default function Home() {
   const handleStartEngine = async () => {
     try {
       setStatus("Conectando");
+      console.log("Requesting Rust to start engine...")
       const success = await invoke<boolean>("start_engine"); // Invoques Rust
       if (success) setStatus("Online");
     } catch (error) {

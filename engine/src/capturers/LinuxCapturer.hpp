@@ -1,7 +1,11 @@
+#pragma once
 // This will only be compiled on Ubuntu
 
 #include <print>
+#include <memory>
 #include "ScreenCapturer.hpp"
+
+class PipeWireClient;
 
 class LinuxCapturer : public ScreenCapturer
 {
@@ -11,6 +15,9 @@ public:
 
   bool start(std::function<void(const VideoFrame &)> on_frame_received) override;
   void stop() override;
+
+private:
+  std::unique_ptr<PipeWireClient> pwStream;
 };
 
 // Factory implementation
