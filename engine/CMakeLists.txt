@@ -40,9 +40,11 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     # Because pkg-config is installed, we use it to find DBus and PipeWire (they are not part of the CMake modules)
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
-    include_directories(${PIPEWIRE_INCLUDE_DIRS}) # Where the headers PipeWire are. So when we write '#include <pipewire/pipewire.h>' it does not crash
-    link_directories(${PIPEWIRE_LIBRARY_DIRS}) # Tells linker where are the binaries (.so) of these packages
+    pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter)
 
+    include_directories(${PIPEWIRE_INCLUDE_DIRS} {FFMPEG_INCLUDE_DIRS}) # Where the headers PipeWire and FFmpeg are. So when we write '#include <pipewire/pipewire.h>' it does not crash
+    link_directories(${PIPEWIRE_LIBRARY_DIRS} {FFMPEG_LIBRARY_DIRS}) # Tells linker where are the binaries (.so) of these packages
+    
     # Macro to C++ engine know we are running on Linux
     add_compile_definitions(__linux__)
     

@@ -16,7 +16,14 @@ public:
   bool connect(int fd, uint32_t node_id, std::function<void(const VideoFrame &)> callback);
   void disconnect();
 
+  bool startLoop();
+  bool configureCore();
+  void configureStream();
+  void negotiateFormat(uint32_t node_id);
+  void onConfigureEnd();
+
 private:
+  int fd;
   pw_thread_loop *loop{};
   pw_context *context{};
   pw_core *core{};

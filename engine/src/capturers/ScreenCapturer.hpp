@@ -6,7 +6,8 @@
 struct VideoFrame
 {
   uint8_t *data;
-  int width, height, stride;
+  int width, height,
+      stride; // Number of bytes that make up a frame horizontal line in memory
 };
 
 // Any capturer (Linux, Mac, Windows) will have to follow this interface
