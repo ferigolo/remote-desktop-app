@@ -1,19 +1,30 @@
-# Dictionary to keep track of connected peers. Format: { "id": websocket_connection }
 import asyncio
+from enum import IntEnum
 import json
 import websockets
 
+
+class SignalingMessageType(IntEnum):
+    Register = 1
+    Offer = 2
+    Answer = 3
+    Candidate = 4
+    Unknown = 5
+
+
+# Dictionary to keep track of connected peers. Format: { "id": websocket_connection }
 peers = {}
 
 
-async def handler(websocket):
+async def handler(websocket: websockets.ServerConnection):
     current_id = None
     try:
         async for message in websocket:
             data = json.loads(message)
+            print(message)
 
             # 1. Registration Phase: A peer identifies itself
-            if data.get("type") == "register":
+            if data.get("type") == SignalingMessageType.Register:
                 current_id = data.get("id")
                 peers[current_id] = websocket
                 print(f"✅ Peer registered: {current_id}")
@@ -30,7 +41,7 @@ async def handler(websocket):
             else:
                 print(f"⚠️ Target {target_id} not found or not registered.")
 
-    except websocket.exceptions.ConnectionClosed:
+    except websockets.exceptions.ConnectionClosed:
         pass
     finally:
         # Cleanup when someone disconnects
