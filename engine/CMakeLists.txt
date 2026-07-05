@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.28) # Recent version for better c++26 compatibility
+cmake_minimum_required(VERSION 3.30) # Recent version for better c++26 compatibility
 project(CoreEngine VERSION 1.0)
 
 # Requires C++26 at least
@@ -65,11 +65,29 @@ elseif(APPLE)
     )
 endif()
 
+# ==========================================                                             
+# Fetch and Build WebRTC (libdatachannel)                                                
+# ==========================================                                             
+include(FetchContent)
+# We only want the core library, no extra bloat
+set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
+set(NO_TESTS ON CACHE BOOL "" FORCE)
+set(NO_WEBSOCKET OFF CACHE BOOL "" FORCE) # Keep WebSockets ON for signaling
+# Allow compiling older dependencies (fixes the plog CMake error)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
+
+FetchContent_Declare(
+    libdatachannel
+    GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
+    GIT_TAG        v0.21.2
+)
+FetchContent_MakeAvailable(libdatachannel)
+
 add_executable(core-engine ${SOURCE_FILES})
 
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
 
-target_link_libraries(core-engine PRIVATE SDL3::SDL3)
+target_link_libraries(core-engine PRIVATE SDL3::SDL3 datachannel)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(core-engine PRIVATE ${PIPEWIRE_LIBRARIES} ${FFMPEG_LIBRARIES} Qt6::Core Qt6::DBus)
