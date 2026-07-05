@@ -2,12 +2,13 @@
 #include <SDL3/SDL.h>
 #include <atomic>
 #include "capturers/ScreenCapturer.hpp"
+#include "network/WebRtcManager.hpp"
 
-class MediaEngine
+class CoreEngine
 {
 public:
-  MediaEngine();
-  ~MediaEngine();
+  CoreEngine();
+  ~CoreEngine();
 
   bool initialize();
 
@@ -16,8 +17,9 @@ private:
   SDL_Renderer *renderer;
   std::atomic<bool> is_running;
   std::unique_ptr<ScreenCapturer> capturer;
+  std::unique_ptr<WebRtcManager> webRtcManager;
 
-  void render_loop();
+  void renderLoop();
   void cleanup();
   void printRendererInfo() const;
 };

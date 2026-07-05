@@ -1,5 +1,5 @@
 #include "CoreEngine.hpp"
-#include "configurers/MediaEngineConfigurer.hpp"
+#include "configurers/CoreEngineConfigurer.hpp"
 #include "utils/PlatformUtils.hpp"
 #include <SDL3/SDL.h>
 #include <print>
@@ -7,16 +7,16 @@
 #include <cmath>
 #include <string_view>
 
-MediaEngine::MediaEngine() : window(nullptr), renderer(nullptr), is_running(false) {}
+CoreEngine::CoreEngine() : window(nullptr), renderer(nullptr), is_running(false) {}
 
-MediaEngine::~MediaEngine()
+CoreEngine::~CoreEngine()
 {
   cleanup();
 }
 
-bool MediaEngine::initialize()
+bool CoreEngine::initialize()
 {
-  MediaEngineConfigurer::configSDL();
+  CoreEngineConfigurer::configSDL();
 
   if (!SDL_Init(SDL_INIT_VIDEO))
   {
@@ -31,6 +31,10 @@ bool MediaEngine::initialize()
     cleanup();
     return false;
   }
+
+  // Instantiate signaling server
+  webRtcManager = std::make_unique<WebRtcManager>();
+  webRtcManager->connectSignaling("ws://0.0.0.0:8080");
 
   // SDL3 no longer uses flags for hardware acceleration/software in CreateRenderer.
   // It handles it natively or you pass a specific driver string. Passing NULL gets the best default.
@@ -50,12 +54,13 @@ bool MediaEngine::initialize()
   capturer = ScreenCapturer::create();
   capturer->start([](const VideoFrame &frame)
                   { std::println("Aqui"); });
-  render_loop();
+
+  renderLoop();
 
   return true;
 }
 
-void MediaEngine::render_loop()
+void CoreEngine::renderLoop()
 {
   SDL_Event event;
   Uint32 start_time = SDL_GetTicks();
@@ -86,7 +91,7 @@ void MediaEngine::render_loop()
   cleanup();
 }
 
-void MediaEngine::cleanup()
+void CoreEngine::cleanup()
 {
   if (capturer)
     capturer.reset();
@@ -108,7 +113,7 @@ void MediaEngine::cleanup()
   }
 }
 
-void MediaEngine::printRendererInfo() const
+void CoreEngine::printRendererInfo() const
 {
 #ifndef NDEBUG
   if (!renderer)

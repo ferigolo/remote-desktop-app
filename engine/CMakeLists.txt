@@ -20,7 +20,8 @@ include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags so the co
 set(SOURCE_FILES 
     src/main.cpp 
     src/CoreEngine.cpp
-    src/configurers/MediaEngineConfigurer.cpp
+    src/configurers/CoreEngineConfigurer.cpp
+    src/network/WebRtcManager.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")

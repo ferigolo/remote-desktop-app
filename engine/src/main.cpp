@@ -28,12 +28,12 @@ int main(int argc, char *argv[])
 
     try
     {
-        std::println(" Starting standalone MediaEngine...");
+        std::println(" Starting standalone CoreEngine...");
 
-        MediaEngine engine;
+        CoreEngine engine;
         if (!engine.initialize())
         {
-            std::println(stderr, "❌ Failed to initialize MediaEngine");
+            std::println(stderr, "❌ Failed to initialize CoreEngine");
             return 1;
         }
 
