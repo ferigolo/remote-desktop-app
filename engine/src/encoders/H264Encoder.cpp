@@ -1,156 +1,272 @@
 #include "H264Encoder.hpp"
 
-H264Encoder::H264Encoder(int width, int height, int fps) : width(width), height(height), fps(fps) {}
-
-H264Encoder::~H264Encoder()
+void H264Encoder::receiveAndProcessPackets()
 {
-  cleanup();
+  AVPacket *pkt = av_packet_alloc();
+  if (!pkt)
+  {
+    printAVErrorAndReturn("Failed to allocate AVPacket");
+    return;
+  }
+
+  while (true)
+  {
+    int ret = avcodec_receive_packet(enc_ctx, pkt);
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+      break; // No more packets available at this moment
+    else if (ret < 0)
+    {
+      printAVErrorAndReturn("Error receiving packet from encoder");
+      break;
+    }
+
+    // Route the encoded packet to our virtual handler
+    onEncodedPacket(pkt);
+    av_packet_unref(pkt);
+  }
+  av_packet_free(&pkt);
 }
 
-bool H264Encoder::initialize()
+void H264Encoder::onEncodedPacket(AVPacket *pkt)
 {
-  const AVCodec *codec = avcodec_find_encoder_by_name("h264_vaapi");
+  static int packetCount = 0;
+  packetCount++;
+  
+  if (packetCount % 60 == 0) {
+    std::cout << "[Encoder] Generated H.264 Packet #" << packetCount << " - Size: " << pkt->size
+              << " bytes, PTS: " << pkt->pts << std::endl;
+  }
+
+  // Example: Here you would write pkt->data to an MP4 file,
+  // or send it over a WebRTC/RTSP socket.
+}
+
+bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
+{
+  std::println("[Encoder] Initializing NVIDIA Hardware Encoder...");
+
+  // 1. Create the CUDA hardware device context
+  if (int ret = av_hwdevice_ctx_create(&cuda_device_ctx, AV_HWDEVICE_TYPE_CUDA, nullptr, nullptr, 0) < 0)
+    return printAVErrorAndReturn("Failed to create CUDA hardware context");
+
+  // 2. Find the NVIDIA H.264 encoder
+  const AVCodec *codec = avcodec_find_encoder_by_name("h264_nvenc");
   if (!codec)
-  {
-    printAVError("Codec h264_vaapi not found. Missing hardware drivers on Linux");
-    return false;
+    return printAVErrorAndReturn("h264_nvenc codec not found! Ensure NVIDIA drivers and FFmpeg non-free are installed");
+
+  enc_ctx = avcodec_alloc_context3(codec);
+  if (!enc_ctx)
+    return printAVErrorAndReturn("Failed to allocate codec context");
+
+  // 3. Bind the hardware context to the encoder
+  enc_ctx->hw_device_ctx = av_buffer_ref(cuda_device_ctx);
+  enc_ctx->pix_fmt = AV_PIX_FMT_CUDA; // Crucial: Encoder expects native CUDA frames
+
+  AVBufferRef *hw_frames_ref = av_hwframe_ctx_alloc(cuda_device_ctx);
+  if (!hw_frames_ref)
+    return printAVErrorAndReturn("Failed to allocate hw frames context");
+
+  AVHWFramesContext *frames_ctx = (AVHWFramesContext *)hw_frames_ref->data;
+  frames_ctx->format = AV_PIX_FMT_CUDA;
+  frames_ctx->sw_format = AV_PIX_FMT_BGR0; // Corresponds to DRM_FORMAT_XRGB8888
+  frames_ctx->width = width;
+  frames_ctx->height = height;
+  frames_ctx->initial_pool_size = 0;
+
+  if (av_hwframe_ctx_init(hw_frames_ref) < 0) {
+      av_buffer_unref(&hw_frames_ref);
+      return printAVErrorAndReturn("Failed to initialize hw frames context");
   }
 
-  if (int ret = av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_VAAPI, nullptr, nullptr, 0) < 0)
-  {
-    printAVError(ret, "GPU access failed");
-    return false;
-  }
+  enc_ctx->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+  av_buffer_unref(&hw_frames_ref);
 
-  // Basic config
-  codecContext = avcodec_alloc_context3(codec);
-  if (!codecContext)
-    return false;
-  codecContext->width = width;
-  codecContext->height = height;
-  codecContext->time_base = {1, fps};
-  codecContext->framerate = {fps, 1};
-  codecContext->pix_fmt = AV_PIX_FMT_VAAPI; // Frames will come directly from VRAM
-  codecContext->bit_rate = 5000000;
+  // 4. Set video parameters
+  enc_ctx->width = width;
+  enc_ctx->height = height;
+  enc_ctx->time_base = av_make_q(1, fps);
+  enc_ctx->framerate = av_make_q(fps, 1);
+  enc_ctx->bit_rate = bitrate;
+  enc_ctx->gop_size = fps * 2; // Keyframe every 2 seconds
+  std::println("[Encoder] time_base={}/{} framerate={}/{}", enc_ctx->time_base.num, enc_ctx->time_base.den, enc_ctx->framerate.num, enc_ctx->framerate.den);
 
-  av_opt_set(codecContext->priv_data, "profile", "baseline", 0);
-  av_opt_set(codecContext->priv_data, "rc_mode", "CBR", 0);
-  filterGraph = avfilter_graph_alloc();
+  // 5. Open the encoder
+  if (int ret = avcodec_open2(enc_ctx, codec, nullptr) < 0)
+    return printAVErrorAndReturn(" Failed to open codec");
 
-  char args[512];
-  std::snprintf(args, sizeof(args),
-                "video_size=%dx%d:pix_fmt=%d:time_base=%d/%d:pixel_aspect=1/1",
-                width, height, AV_PIX_FMT_BGR0, 1, fps);
-
-  const AVFilter *buffersrc = avfilter_get_by_name("buffer");
-  const AVFilter *buffersink = avfilter_get_by_name("buffersink");
-
-  avfilter_graph_create_filter(&bufSrcCtx, buffersrc, "in", args, nullptr, filterGraph);
-  bufSrcCtx->hw_device_ctx = av_buffer_ref(hwDeviceCtx);
-  avfilter_graph_create_filter(&bufSinkCtx, buffersink, "out", nullptr, nullptr, filterGraph);
-
-  AVFilterInOut *outputs = avfilter_inout_alloc();
-  AVFilterInOut *inputs = avfilter_inout_alloc();
-  outputs->name = av_strdup("in");
-  outputs->filter_ctx = bufSrcCtx;
-  outputs->pad_idx = 0;
-  outputs->next = nullptr;
-  inputs->name = av_strdup("out");
-  inputs->filter_ctx = bufSinkCtx;
-  inputs->pad_idx = 0;
-  inputs->next = nullptr;
-
-  // Converts BGR0 into NV12
-  if (avfilter_graph_parse_ptr(filterGraph, "hwupload,scale_vaapi=format=nv12", &inputs, &outputs, nullptr) < 0 ||
-      avfilter_graph_config(filterGraph, nullptr) < 0)
-  {
-    printAVError("Pipeline configuration of GPU conversion failed");
-    return false;
-  }
-  avfilter_inout_free(&inputs);
-  avfilter_inout_free(&outputs);
-
-  // Gets filter results to feed encoder
-  codecContext->hw_frames_ctx = av_buffer_ref(av_buffersink_get_hw_frames_ctx(bufSinkCtx));
-
-  if (int ret = avcodec_open2(codecContext, codec, nullptr) < 0)
-  {
-    printAVError(ret, "Failed to open VAAPI encoder");
-    return false;
-  }
-
-  cpuBgrFrame = av_frame_alloc();
-  cpuBgrFrame->format = AV_PIX_FMT_BGR0;
-  cpuBgrFrame->width = width;
-  cpuBgrFrame->height = height;
-
-  filteredHwFrame = av_frame_alloc();
-  packet = av_packet_alloc();
-
-  std::println("✅ [Encoder] GPU VPP Pipeline (BGR0 -> NV12 -> H.264) initialized: {}x{} @ {}fps", width, height, fps);
+  std::println("[Encoder] Successfully initialized: {}x{}@{}fps", width, height, fps);
   return true;
 }
 
-bool H264Encoder::encode(const VideoFrame &frame, std::function<void(const uint8_t *data, size_t size)> on_packet_ready)
+void H264Encoder::encodeDmaBuf(int fd, int width, int height, int stride, uint64_t modifier)
 {
-  // Zero CPU copy
-  cpuBgrFrame->data[0] = frame.data;
-  cpuBgrFrame->linesize[0] = frame.stride;
-  cpuBgrFrame->pts = frameCounter++;
-
-  if (int ret = av_buffersrc_add_frame_flags(bufSrcCtx, cpuBgrFrame, AV_BUFFERSRC_FLAG_KEEP_REF) < 0) // Keep a reference to the frame
+  if (!enc_ctx)
   {
-    printAVError(ret, "Failed sending frame to GPU");
-    return false;
+    printAVErrorAndReturn("Encoder not initialized");
+    close(fd); // Prevent FD leak
+    return;
   }
 
-  while (av_buffersink_get_frame(bufSinkCtx, filteredHwFrame) >= 0)
+  // --- STEP 1: Wrap the DMA-BUF in an AVFrame (DRM PRIME format) ---
+  AVDRMFrameDescriptor *desc = (AVDRMFrameDescriptor *)av_mallocz(sizeof(*desc));
+  if (!desc)
   {
-    // Sends to compression
-    if (int ret = avcodec_send_frame(codecContext, filteredHwFrame) < 0)
-    {
-      printAVError(ret, "Failed to send frame for compression");
-      return false;
-    }
-
-    while (avcodec_receive_packet(codecContext, packet) >= 0)
-    {
-      if (on_packet_ready)
-        on_packet_ready(packet->data, packet->size);
-      av_packet_unref(packet);
-    }
-
-    av_frame_unref(filteredHwFrame); // Free VRAM reference
+    close(fd);
+    return;
   }
 
-  return true;
+  desc->nb_objects = 1;
+  desc->objects[0].fd = fd;
+  desc->objects[0].size = height * stride;
+  desc->objects[0].format_modifier = modifier;
+
+  desc->nb_layers = 1;
+  desc->layers[0].format = DRM_FORMAT_XRGB8888; // Match with what requested from PipeWire
+  desc->layers[0].nb_planes = 1;
+  desc->layers[0].planes[0].object_index = 0;
+  desc->layers[0].planes[0].offset = 0;
+  desc->layers[0].planes[0].pitch = stride;
+
+  AVFrame *drm_frame = av_frame_alloc();
+  drm_frame->format = AV_PIX_FMT_DRM_PRIME;
+  drm_frame->width = width;
+  drm_frame->height = height;
+  drm_frame->data[0] = (uint8_t *)desc;
+
+  // Set up the custom destructor for the buffer.
+  // When drm_frame is freed, FFmpeg will automatically call this lambda.
+  drm_frame->buf[0] = av_buffer_create(
+      (uint8_t *)desc, sizeof(*desc),
+      [](void *opaque, uint8_t *data)
+      {
+        AVDRMFrameDescriptor *d = (AVDRMFrameDescriptor *)data;
+        close(d->objects[0].fd); // Safely close the duplicated FD
+        av_free(d);
+      },
+      nullptr, 0);
+
+  // --- STEP 2: Map the DRM Frame to the NVIDIA (CUDA) Context (ZERO-COPY) ---
+  AVFrame *cuda_frame = av_frame_alloc();
+  cuda_frame->format = AV_PIX_FMT_CUDA;
+
+  if (int ret = av_hwframe_map(cuda_frame, drm_frame, AV_HWFRAME_MAP_READ) < 0)
+  {
+    printAVErrorAndReturn("Failed to map DRM frame to CUDA. Modifier issue?");
+    av_frame_free(&cuda_frame);
+    av_frame_free(&drm_frame);
+    return;
+  }
+
+  cuda_frame->pts = pts_counter++;
+
+  // --- STEP 3: Send to Hardware Encoder ---
+  if (int ret = avcodec_send_frame(enc_ctx, cuda_frame) < 0)
+    printAVErrorAndReturn("Error sending frame to encoder");
+  else
+    receiveAndProcessPackets(); // Retrieve encoded packets (NAL units)
+
+  // --- STEP 4: Cleanup Frame Memory ---
+  // Freeing cuda_frame drops its reference to drm_frame.
+  // Freeing drm_frame triggers the buffer destructor lambda, closing the FD.
+  av_frame_free(&cuda_frame);
+  av_frame_free(&drm_frame);
 }
 
-void H264Encoder::printAVError(const char *message)
+void H264Encoder::flush()
 {
-  std::println(stderr, "❌ [Encoder H264] {}", message);
-}
-
-void H264Encoder::printAVError(int &ret, const char *message)
-{
-  static char errbuf[AV_ERROR_MAX_STRING_SIZE];
-  av_strerror(ret, errbuf, sizeof(errbuf));
-
-  std::println(stderr, "❌ [Encoder H264] {} (VAAPI). Error: {} (Code: {})", message, errbuf, ret);
+  if (!enc_ctx)
+    return;
+  std::println("[Encoder] Flushing remaining frames...");
+  avcodec_send_frame(enc_ctx, nullptr);
+  receiveAndProcessPackets();
 }
 
 void H264Encoder::cleanup()
 {
-  if (filterGraph)
-    avfilter_graph_free(&filterGraph);
-  if (cpuBgrFrame)
-    av_frame_free(&cpuBgrFrame);
-  if (filteredHwFrame)
-    av_frame_free(&filteredHwFrame);
-  if (packet)
-    av_packet_free(&packet);
-  if (codecContext)
-    avcodec_free_context(&codecContext);
-  if (hwDeviceCtx)
-    av_buffer_unref(&hwDeviceCtx);
-};
+  flush();
+  if (enc_ctx)
+  {
+    avcodec_free_context(&enc_ctx);
+    enc_ctx = nullptr;
+  }
+  if (cuda_device_ctx)
+  {
+    av_buffer_unref(&cuda_device_ctx);
+    cuda_device_ctx = nullptr;
+  }
+}
+
+void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
+{
+  if (!enc_ctx) {
+    printAVErrorAndReturn("Encoder not initialized");
+    close(fd);
+    return;
+  }
+
+  size_t size = height * stride;
+  void *data = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
+  if (data == MAP_FAILED) {
+    printAVErrorAndReturn("Failed to mmap MemFd");
+    close(fd);
+    return;
+  }
+
+  AVFrame *sw_frame = av_frame_alloc();
+  sw_frame->format = AV_PIX_FMT_BGR0;
+  sw_frame->width = width;
+  sw_frame->height = height;
+  sw_frame->linesize[0] = stride;
+  sw_frame->data[0] = (uint8_t *)data;
+  sw_frame->pts = pts_counter++;
+
+  struct MemFdContext {
+      int fd;
+      size_t size;
+  };
+  MemFdContext *ctx = new MemFdContext{fd, size};
+
+  sw_frame->buf[0] = av_buffer_create(
+      (uint8_t *)data, size,
+      [](void *opaque, uint8_t *data) {
+          MemFdContext *ctx = (MemFdContext *)opaque;
+          munmap(data, ctx->size);
+          close(ctx->fd);
+          delete ctx;
+      },
+      ctx, 0);
+
+  // Allocate a CUDA hardware frame
+  AVFrame *hw_frame = av_frame_alloc();
+  if (!hw_frame) {
+      printAVErrorAndReturn("Failed to allocate hw_frame");
+      av_frame_free(&sw_frame);
+      return;
+  }
+
+  if (int ret = av_hwframe_get_buffer(enc_ctx->hw_frames_ctx, hw_frame, 0) < 0) {
+      printAVErrorAndReturn("Failed to allocate CUDA buffer for MemFd frame");
+      av_frame_free(&hw_frame);
+      av_frame_free(&sw_frame);
+      return;
+  }
+
+  // Upload the frame from CPU (MemFd) to GPU (CUDA)
+  if (int ret = av_hwframe_transfer_data(hw_frame, sw_frame, 0) < 0) {
+      printAVErrorAndReturn("Failed to transfer MemFd data to CUDA GPU");
+      av_frame_free(&hw_frame);
+      av_frame_free(&sw_frame);
+      return;
+  }
+
+  hw_frame->pts = sw_frame->pts;
+
+  if (int ret = avcodec_send_frame(enc_ctx, hw_frame) < 0) {
+    printAVErrorAndReturn("Error sending hw_frame to encoder");
+  } else {
+    receiveAndProcessPackets();
+  }
+
+  av_frame_free(&hw_frame);
+  av_frame_free(&sw_frame);
+}

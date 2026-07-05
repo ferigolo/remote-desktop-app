@@ -1,53 +1,51 @@
-// VAAPI accelerated encoder
-
-#pragma once
-
-#include <cstdint>
-#include <functional>
-#include <memory>
+#include <iostream>
+#include <stdexcept>
+#include <unistd.h>
 #include <print>
+#include <sys/mman.h>
 
-// FFmpeg is written in C, so we warn the compiler
 extern "C"
 {
 #include <libavcodec/avcodec.h>
-#include <libavutil/imgutils.h>
-#include <libavutil/opt.h>
 #include <libavutil/hwcontext.h>
-#include <libavfilter/avfilter.h>
-#include <libavfilter/buffersink.h>
-#include <libavfilter/buffersrc.h>
+#include <libavutil/hwcontext_drm.h>
+#include <libavutil/hwcontext_cuda.h>
+#include <libavutil/pixdesc.h>
+#include <libdrm/drm_fourcc.h>
 }
-
-#include "../capturers/ScreenCapturer.hpp"
 
 class H264Encoder
 {
-public:
-  H264Encoder(int width, int height, int fps = 60);
-  ~H264Encoder();
-
-  bool initialize();
-  bool encode(const VideoFrame &frame, std::function<void(const uint8_t *data, size_t size)> on_packet_ready);
-
-
 private:
-  int width, height, fps;
-  int64_t frameCounter = 0;
+  AVBufferRef *cuda_device_ctx = nullptr;
+  AVCodecContext *enc_ctx = nullptr;
+  int64_t pts_counter = 0;
 
-  AVCodecContext *codecContext{};
-  AVPacket *packet{};
+  // Internal helper to pull encoded packets from the encoder
+  void receiveAndProcessPackets();
+  bool printAVErrorAndReturn(const char *message)
+  {
+    std::println(std::cerr, "[Encoder] {}", message);
+    return false;
+  }
 
-  AVBufferRef *hwDeviceCtx{};
-  AVFilterGraph *filterGraph{};
-  AVFilterContext *bufSrcCtx{};
-  AVFilterContext *bufSinkCtx{};
+protected:
+  // Virtual method to be overridden by the user.
+  // This is where you get the final H.264 NAL units.
+  virtual void onEncodedPacket(AVPacket *pkt);
 
-  // Frames
-  AVFrame *cpuBgrFrame{};     // Pointers for PipeWire memory
-  AVFrame *filteredHwFrame{}; // Filter result (NV12 on VRAM)
+public:
+  H264Encoder() = default;
+  virtual ~H264Encoder() { cleanup(); }
 
-  static void printAVError(const char *message);
-  static void printAVError(int &ret, const char *message);
-  void cleanup();
+  // Initialize the NVENC hardware encoder
+  bool initialize(int width, int height, int fps = 60, int bitrate = 5000000);
+
+  // Main function to be called from the PipeWire process callback
+  void encodeDmaBuf(int fd, int width, int height, int stride, uint64_t modifier);
+  void encodeMemFd(int fd, int width, int height, int stride);
+
+  // Flush the encoder (Call this before shutting down to get remaining delayed frames)
+  void flush();
+  void cleanup(); // Safely free FFmpeg contexts
 };

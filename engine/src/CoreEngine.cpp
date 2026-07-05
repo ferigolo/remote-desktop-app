@@ -18,13 +18,13 @@ bool MediaEngine::initialize()
 {
   MediaEngineConfigurer::configSDL();
 
-  if (SDL_Init(SDL_INIT_VIDEO) < 0)
+  if (!SDL_Init(SDL_INIT_VIDEO))
   {
     std::println(stderr, "❌ [CoreEngine] Error initializing SDL: {}", SDL_GetError());
     return false;
   }
 
-  window = SDL_CreateWindow("Remote Desktop", 1920, 1080, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY | SDL_WINDOW_MAXIMIZED);
+  window = SDL_CreateWindow("Remote Desktop", 1920, 1080, SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY);
   if (!window)
   {
     std::println(stderr, "❌ [CoreEngine] Error creating window: {}", SDL_GetError());
@@ -49,8 +49,7 @@ bool MediaEngine::initialize()
 
   capturer = ScreenCapturer::create();
   capturer->start([](const VideoFrame &frame)
-                  { static unsigned int count = 0;
-                     std::println("Got frame {}!", ++count); });
+                  { std::println("Aqui"); });
   render_loop();
 
   return true;
@@ -91,7 +90,7 @@ void MediaEngine::cleanup()
 {
   if (capturer)
     capturer.reset();
-    
+
   if (renderer)
   {
     SDL_DestroyRenderer(renderer);

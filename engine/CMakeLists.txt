@@ -31,6 +31,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/capturers/linux/ScreencastPortal.cpp
         src/utils/linux/PlatformUtils.cpp
         src/capturers/LinuxCapturer.cpp
+        src/encoders/H264Encoder.cpp
     )
 
     find_package(Qt6 COMPONENTS Core DBus REQUIRED)
@@ -42,8 +43,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
     pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter)
 
-    include_directories(${PIPEWIRE_INCLUDE_DIRS} {FFMPEG_INCLUDE_DIRS}) # Where the headers PipeWire and FFmpeg are. So when we write '#include <pipewire/pipewire.h>' it does not crash
-    link_directories(${PIPEWIRE_LIBRARY_DIRS} {FFMPEG_LIBRARY_DIRS}) # Tells linker where are the binaries (.so) of these packages
+    include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS} "/usr/local/cuda/include") # Where the headers PipeWire and FFmpeg are. So when we write '#include <pipewire/pipewire.h>' it does not crash
+    link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS} "/usr/local/cuda/lib64") # Tells linker where are the binaries (.so) of these packages
     
     # Macro to C++ engine know we are running on Linux
     add_compile_definitions(__linux__)
@@ -71,7 +72,7 @@ target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
 target_link_libraries(core-engine PRIVATE SDL3::SDL3)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_link_libraries(core-engine PRIVATE ${PIPEWIRE_LIBRARIES} Qt6::Core Qt6::DBus)
+    target_link_libraries(core-engine PRIVATE ${PIPEWIRE_LIBRARIES} ${FFMPEG_LIBRARIES} Qt6::Core Qt6::DBus)
 endif()
 
 # Required by Rust's cmake crate to output the binary correctly
