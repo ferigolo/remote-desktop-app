@@ -32,9 +32,7 @@ bool CoreEngine::initialize()
     return false;
   }
 
-  // Instantiate signaling server
-  webRtcManager = std::make_unique<WebRtcManager>();
-  webRtcManager->connectSignaling("ws://0.0.0.0:8080");
+  initializeWebRtcManager();
 
   // SDL3 no longer uses flags for hardware acceleration/software in CreateRenderer.
   // It handles it natively or you pass a specific driver string. Passing NULL gets the best default.
@@ -51,13 +49,42 @@ bool CoreEngine::initialize()
   printRendererInfo();
   is_running = true;
 
+  encoder = std::make_unique<H264Encoder>();
   capturer = ScreenCapturer::create();
-  capturer->start([](const VideoFrame &frame)
-                  { std::println("Aqui"); });
+  capturer->start([this](const VideoFrame &frame)
+                  { handleIncomingFrame(frame); });
 
   renderLoop();
 
   return true;
+}
+
+void CoreEngine::handleIncomingFrame(const VideoFrame &frame)
+{
+  if (!encoder->isInitialized)
+  {
+    encoder->initialize(frame.width, frame.height, frame.fps);
+    encoder->onEncodedPacketCallback = [this](AVPacket *p)
+    {
+      if (webRtcManager)
+        webRtcManager->sendVideoPacket(p->data, p->size);
+    };
+  }
+
+  if (frame.type == FrameMemoryType::DmaBuf)
+    encoder->encodeDmaBuf(frame.fd, frame.width, frame.height, frame.stride, frame.drmModifier);
+  else
+    encoder->encodeMemFd(frame.fd, frame.width, frame.height, frame.stride);
+}
+
+void CoreEngine::initializeWebRtcManager()
+{
+  // Instantiate signaling server
+  webRtcManager = std::make_unique<WebRtcManager>();
+  webRtcManager->connectSignaling("ws://0.0.0.0:8080");
+  webRtcManager->initializePeerConnection();
+  webRtcManager->initializeDataChannel();
+  webRtcManager->initializeVideoTrack();
 }
 
 void CoreEngine::renderLoop()
@@ -95,7 +122,10 @@ void CoreEngine::cleanup()
 {
   if (capturer)
     capturer.reset();
-
+  if (encoder)
+    encoder.reset();
+  if (webRtcManager)
+    webRtcManager.reset();
   if (renderer)
   {
     SDL_DestroyRenderer(renderer);

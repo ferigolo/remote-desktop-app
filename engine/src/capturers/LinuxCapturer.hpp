@@ -13,7 +13,7 @@ public:
   LinuxCapturer() { std::println("🐧 [LinuxCapturer] Instantiated. Preparing XDG Portal and PipeWire..."); }
   ~LinuxCapturer() override { stop(); }
 
-  bool start(std::function<void(const VideoFrame &)> on_frame_received) override;
+  bool start(std::function<void(const VideoFrame &)> onFrameReceived) override;
   void stop() override;
 
 private:

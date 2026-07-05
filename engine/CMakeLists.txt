@@ -65,18 +65,16 @@ elseif(APPLE)
         ${FOUNDATION}
     )
 endif()
-
-# ==========================================                                             
-# Fetch and Build WebRTC (libdatachannel)                                                
-# ==========================================                                             
+                 
 include(FetchContent)
 # We only want the core library, no extra bloat
 set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
 set(NO_TESTS ON CACHE BOOL "" FORCE)
 set(NO_WEBSOCKET OFF CACHE BOOL "" FORCE) # Keep WebSockets ON for signaling
 # Allow compiling older dependencies (fixes the plog CMake error)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.5 CACHE STRING "" FORCE)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10 CACHE STRING "" FORCE)
 
+# Fetch and build lidatachannel (WebRTC)
 FetchContent_Declare(
     libdatachannel
     GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
@@ -84,11 +82,14 @@ FetchContent_Declare(
 )
 FetchContent_MakeAvailable(libdatachannel)
 
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json)
+
 add_executable(core-engine ${SOURCE_FILES})
 
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
 
-target_link_libraries(core-engine PRIVATE SDL3::SDL3 datachannel)
+target_link_libraries(core-engine PRIVATE SDL3::SDL3 datachannel nlohmann_json::nlohmann_json)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(core-engine PRIVATE ${PIPEWIRE_LIBRARIES} ${FFMPEG_LIBRARIES} Qt6::Core Qt6::DBus)

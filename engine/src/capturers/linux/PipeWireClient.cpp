@@ -117,11 +117,7 @@ void PipeWireClient::onConfigureEnd()
 void PipeWireClient::disconnect()
 {
   if (loop)
-  {
     pw_thread_loop_stop(loop);
-    pw_thread_loop_lock(loop);
-    loop = nullptr;
-  }
   if (stream)
   {
     pw_stream_disconnect(stream);
@@ -138,8 +134,11 @@ void PipeWireClient::disconnect()
     pw_context_destroy(context);
     context = nullptr;
   }
-  if (encoder)
-    encoder->cleanup();
+  if (loop)
+  { // We need to destroy everything else first wit the loop paused
+    pw_thread_loop_destroy(loop);
+    loop = nullptr;
+  }
 }
 
 void PipeWireClient::onCoreError(void * /*data*/, uint32_t id, int /*seq*/, int /*res*/, const char *message)
@@ -177,20 +176,11 @@ void PipeWireClient::onStreamParamChanged(void *data, uint32_t id, const spa_pod
     return;
   }
 
-  self->encoder = std::make_unique<H264Encoder>();
-
   self->width = info.size.width;
   self->height = info.size.height;
   self->format = info.format;
+  self->fps = (info.framerate.denom > 0 && info.framerate.num > 0) ? info.framerate.num / info.framerate.denom : 144;
   self->drmModifier = info.modifier;
-
-  int fps = (info.framerate.denom > 0 && info.framerate.num > 0) ? info.framerate.num / info.framerate.denom : 144;
-
-  if (!self->encoder->initialize(self->width, self->height, fps))
-  {
-    std::println(stderr, "[PipeWireClient] Failed initializing H264Encoder");
-    return;
-  }
 
   uint8_t buffer[1024];
   spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
@@ -219,47 +209,43 @@ void PipeWireClient::onStreamProcess(void *data)
     return;
 
   struct spa_buffer *buf = b->buffer;
+  VideoFrame frame = {
+      .type = FrameMemoryType::MemFd,
+      .fd = dup(buf->datas[0].fd),
+      .width = self->width,
+      .height = self->height,
+      .stride = buf->datas[0].chunk->stride,
+      .fps = self->fps,
+      .drmModifier = self->drmModifier};
+
   if (buf->datas[0].chunk->size == 0)
   {
     pw_stream_queue_buffer(self->stream, b);
     return;
   }
-  if (buf->datas[0].type == SPA_DATA_DmaBuf || buf->datas[0].type == SPA_ID_INVALID)
+
+  switch (buf->datas[0].type)
   {
-    int dma_buf_fd = buf->datas[0].fd;
-    uint32_t stride = buf->datas[0].chunk->stride;
-
-    int ffmpeg_fd = dup(dma_buf_fd);
-
-    if (self->encoder)
-    {
-      self->encoder->encodeDmaBuf(ffmpeg_fd, self->width, self->height, stride, self->drmModifier);
-
-      static int frameCount = 0;
-      frameCount++;
-      if (frameCount % 60 == 0)
-      {
-        std::println("📸 [PipeWireClient] Captured and sent {} frames (GPU DmaBuf) to H264Encoder...", frameCount);
-      }
-    }
+  case SPA_DATA_DmaBuf:
+  case SPA_ID_INVALID:
+    frame.type = FrameMemoryType::DmaBuf;
+    static int frameCount = 0;
+    frameCount++;
+    if (frameCount % 60 == 0)
+      std::println("📸 [PipeWireClient] Captured and sent {} frames (GPU DmaBuf) to H264Encoder...", frameCount);
+    break;
+  case SPA_DATA_MemFd:
+    static int frameCountMemFd = 0;
+    frameCountMemFd++;
+    if (frameCountMemFd % 144 == 0)
+      std::println("📸 [PipeWireClient] Captured and sent {} frames (MemFd) to H264Encoder...", frameCountMemFd);
+    break;
+  default:
+    break;
   }
-  else if (buf->datas[0].type == SPA_DATA_MemFd)
-  {
-    int mem_fd = dup(buf->datas[0].fd);
-    uint32_t stride = buf->datas[0].chunk->stride;
 
-    if (self->encoder)
-    {
-      self->encoder->encodeMemFd(mem_fd, self->width, self->height, stride);
-
-      static int frameCountMemFd = 0;
-      frameCountMemFd++;
-      if (frameCountMemFd % 144 == 0)
-      {
-        std::println("📸 [PipeWireClient] Captured and sent {} frames (MemFd) to H264Encoder...", frameCountMemFd);
-      }
-    }
-  }
+  if (self->onFrameCallback)
+    self->onFrameCallback(frame);
 
   pw_stream_queue_buffer(self->stream, b);
 }

@@ -27,7 +27,7 @@ public:
 
 private:
   int fd;
-  int32_t width{0}, height{0};
+  uint32_t width{0}, height{0}, fps{60};
   spa_video_format format;
   uint64_t drmModifier{0};
   pw_stream *stream{};
@@ -36,10 +36,7 @@ private:
   pw_context *context{};
   pw_core *core{};
 
-
   std::function<void(const VideoFrame &)> onFrameCallback; // Tells what to do with each frame. Called on every frame
-
-  std::unique_ptr<H264Encoder> encoder;
 
   spa_hook core_listener;
   spa_hook stream_listener;

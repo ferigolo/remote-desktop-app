@@ -5,7 +5,7 @@
 #include "linux/ScreencastPortal.hpp"
 #include "linux/PipeWireClient.hpp"
 
-bool LinuxCapturer::start(std::function<void(const VideoFrame &)> on_frame_received)
+bool LinuxCapturer::start(std::function<void(const VideoFrame &)> onFrameReceived)
 {
   std::println("🐧 [LinuxCapturer] Starting Wayland capture process...");
 
@@ -27,19 +27,13 @@ bool LinuxCapturer::start(std::function<void(const VideoFrame &)> on_frame_recei
   // PAUSED -> STREAMING
   pwStream = std::make_unique<PipeWireClient>();
   auto result = sp.getResult();
-  bool connected = pwStream->connect(result.fd, result.node_id, on_frame_received);
-  
+  bool connected = pwStream->connect(result.fd, result.node_id, onFrameReceived);
+
   if (result.fd != -1)
-  {
     close(result.fd);
-  }
 
   if (!connected)
-  {
     return false;
-  }
-
-  // TODO: 3. Iniciar o loop de receção de frames e chamar on_frame_received()
 
   return true;
 }

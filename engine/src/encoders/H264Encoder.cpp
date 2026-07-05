@@ -31,12 +31,11 @@ void H264Encoder::onEncodedPacket(AVPacket *pkt)
 {
   static int packetCount = 0;
   packetCount++;
-  
-  if (packetCount % 60 == 0) {
-    std::cout << "[Encoder] Generated H.264 Packet #" << packetCount << " - Size: " << pkt->size
-              << " bytes, PTS: " << pkt->pts << std::endl;
-  }
 
+  if (packetCount % 60 == 0)
+    std::println("[Encoder] Generated H.264 Packet #{} - Size: {} bytes, PTS: {}\n[Encoder] Calling onEncodedPacketCallback...", packetCount, pkt->size, pkt->pts);
+
+  onEncodedPacketCallback(pkt);
   // Example: Here you would write pkt->data to an MP4 file,
   // or send it over a WebRTC/RTSP socket.
 }
@@ -73,9 +72,10 @@ bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
   frames_ctx->height = height;
   frames_ctx->initial_pool_size = 0;
 
-  if (av_hwframe_ctx_init(hw_frames_ref) < 0) {
-      av_buffer_unref(&hw_frames_ref);
-      return printAVErrorAndReturn("Failed to initialize hw frames context");
+  if (av_hwframe_ctx_init(hw_frames_ref) < 0)
+  {
+    av_buffer_unref(&hw_frames_ref);
+    return printAVErrorAndReturn("Failed to initialize hw frames context");
   }
 
   enc_ctx->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
@@ -94,6 +94,7 @@ bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
   if (int ret = avcodec_open2(enc_ctx, codec, nullptr) < 0)
     return printAVErrorAndReturn(" Failed to open codec");
 
+  isInitialized = true;
   std::println("[Encoder] Successfully initialized: {}x{}@{}fps", width, height, fps);
   return true;
 }
@@ -163,7 +164,7 @@ void H264Encoder::encodeDmaBuf(int fd, int width, int height, int stride, uint64
   if (int ret = avcodec_send_frame(enc_ctx, cuda_frame) < 0)
     printAVErrorAndReturn("Error sending frame to encoder");
   else
-    receiveAndProcessPackets(); // Retrieve encoded packets (NAL units)
+    receiveAndProcessPackets();
 
   // --- STEP 4: Cleanup Frame Memory ---
   // Freeing cuda_frame drops its reference to drm_frame.
@@ -198,7 +199,8 @@ void H264Encoder::cleanup()
 
 void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
 {
-  if (!enc_ctx) {
+  if (!enc_ctx)
+  {
     printAVErrorAndReturn("Encoder not initialized");
     close(fd);
     return;
@@ -206,7 +208,8 @@ void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
 
   size_t size = height * stride;
   void *data = mmap(NULL, size, PROT_READ, MAP_PRIVATE, fd, 0);
-  if (data == MAP_FAILED) {
+  if (data == MAP_FAILED)
+  {
     printAVErrorAndReturn("Failed to mmap MemFd");
     close(fd);
     return;
@@ -220,52 +223,56 @@ void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
   sw_frame->data[0] = (uint8_t *)data;
   sw_frame->pts = pts_counter++;
 
-  struct MemFdContext {
-      int fd;
-      size_t size;
+  struct MemFdContext
+  {
+    int fd;
+    size_t size;
   };
   MemFdContext *ctx = new MemFdContext{fd, size};
 
   sw_frame->buf[0] = av_buffer_create(
       (uint8_t *)data, size,
-      [](void *opaque, uint8_t *data) {
-          MemFdContext *ctx = (MemFdContext *)opaque;
-          munmap(data, ctx->size);
-          close(ctx->fd);
-          delete ctx;
+      [](void *opaque, uint8_t *data)
+      {
+        MemFdContext *ctx = (MemFdContext *)opaque;
+        munmap(data, ctx->size);
+        close(ctx->fd);
+        delete ctx;
       },
       ctx, 0);
 
   // Allocate a CUDA hardware frame
   AVFrame *hw_frame = av_frame_alloc();
-  if (!hw_frame) {
-      printAVErrorAndReturn("Failed to allocate hw_frame");
-      av_frame_free(&sw_frame);
-      return;
+  if (!hw_frame)
+  {
+    printAVErrorAndReturn("Failed to allocate hw_frame");
+    av_frame_free(&sw_frame);
+    return;
   }
 
-  if (int ret = av_hwframe_get_buffer(enc_ctx->hw_frames_ctx, hw_frame, 0) < 0) {
-      printAVErrorAndReturn("Failed to allocate CUDA buffer for MemFd frame");
-      av_frame_free(&hw_frame);
-      av_frame_free(&sw_frame);
-      return;
+  if (int ret = av_hwframe_get_buffer(enc_ctx->hw_frames_ctx, hw_frame, 0) < 0)
+  {
+    printAVErrorAndReturn("Failed to allocate CUDA buffer for MemFd frame");
+    av_frame_free(&hw_frame);
+    av_frame_free(&sw_frame);
+    return;
   }
 
   // Upload the frame from CPU (MemFd) to GPU (CUDA)
-  if (int ret = av_hwframe_transfer_data(hw_frame, sw_frame, 0) < 0) {
-      printAVErrorAndReturn("Failed to transfer MemFd data to CUDA GPU");
-      av_frame_free(&hw_frame);
-      av_frame_free(&sw_frame);
-      return;
+  if (int ret = av_hwframe_transfer_data(hw_frame, sw_frame, 0) < 0)
+  {
+    printAVErrorAndReturn("Failed to transfer MemFd data to CUDA GPU");
+    av_frame_free(&hw_frame);
+    av_frame_free(&sw_frame);
+    return;
   }
 
   hw_frame->pts = sw_frame->pts;
 
-  if (int ret = avcodec_send_frame(enc_ctx, hw_frame) < 0) {
+  if (int ret = avcodec_send_frame(enc_ctx, hw_frame) < 0)
     printAVErrorAndReturn("Error sending hw_frame to encoder");
-  } else {
+  else
     receiveAndProcessPackets();
-  }
 
   av_frame_free(&hw_frame);
   av_frame_free(&sw_frame);

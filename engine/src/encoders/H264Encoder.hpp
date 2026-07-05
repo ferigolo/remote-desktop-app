@@ -3,6 +3,7 @@
 #include <unistd.h>
 #include <print>
 #include <sys/mman.h>
+#include <functional>
 
 extern "C"
 {
@@ -35,8 +36,11 @@ protected:
   virtual void onEncodedPacket(AVPacket *pkt);
 
 public:
+  H264Encoder(std::function<void(AVPacket *pkt)> onEncodedPacketCallback) : onEncodedPacketCallback(onEncodedPacketCallback) {}
   H264Encoder() = default;
   virtual ~H264Encoder() { cleanup(); }
+
+  std::function<void(AVPacket *pkt)> onEncodedPacketCallback;
 
   // Initialize the NVENC hardware encoder
   bool initialize(int width, int height, int fps = 60, int bitrate = 5000000);
@@ -48,4 +52,6 @@ public:
   // Flush the encoder (Call this before shutting down to get remaining delayed frames)
   void flush();
   void cleanup(); // Safely free FFmpeg contexts
+
+  bool isInitialized = false;
 };
