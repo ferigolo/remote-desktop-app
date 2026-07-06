@@ -11,7 +11,7 @@ void H264Encoder::receiveAndProcessPackets()
 
   while (true)
   {
-    int ret = avcodec_receive_packet(enc_ctx, pkt);
+    int ret = avcodec_receive_packet(encCtx, pkt);
     if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
       break; // No more packets available at this moment
     else if (ret < 0)
@@ -33,7 +33,7 @@ void H264Encoder::onEncodedPacket(AVPacket *pkt)
   packetCount++;
 
   if (packetCount % 60 == 0)
-    std::println("[Encoder] Generated H.264 Packet #{} - Size: {} bytes, PTS: {}\n[Encoder] Calling onEncodedPacketCallback...", packetCount, pkt->size, pkt->pts);
+    std::println("[Encoder] Generated H.264 Packet #{} - Size: {} bytes, PTS: {}", packetCount, pkt->size, pkt->pts);
 
   onEncodedPacketCallback(pkt);
   // Example: Here you would write pkt->data to an MP4 file,
@@ -42,6 +42,9 @@ void H264Encoder::onEncodedPacket(AVPacket *pkt)
 
 bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
 {
+  this->fps = fps;
+  this->start_time = std::chrono::steady_clock::now();
+
   std::println("[Encoder] Initializing NVIDIA Hardware Encoder...");
 
   // 1. Create the CUDA hardware device context
@@ -53,24 +56,24 @@ bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
   if (!codec)
     return printAVErrorAndReturn("h264_nvenc codec not found! Ensure NVIDIA drivers and FFmpeg non-free are installed");
 
-  enc_ctx = avcodec_alloc_context3(codec);
-  if (!enc_ctx)
+  encCtx = avcodec_alloc_context3(codec);
+  if (!encCtx)
     return printAVErrorAndReturn("Failed to allocate codec context");
 
   // 3. Bind the hardware context to the encoder
-  enc_ctx->hw_device_ctx = av_buffer_ref(cuda_device_ctx);
-  enc_ctx->pix_fmt = AV_PIX_FMT_CUDA; // Crucial: Encoder expects native CUDA frames
+  encCtx->hw_device_ctx = av_buffer_ref(cuda_device_ctx);
+  encCtx->pix_fmt = AV_PIX_FMT_CUDA; // Crucial: Encoder expects native CUDA frames
 
   AVBufferRef *hw_frames_ref = av_hwframe_ctx_alloc(cuda_device_ctx);
   if (!hw_frames_ref)
     return printAVErrorAndReturn("Failed to allocate hw frames context");
 
-  AVHWFramesContext *frames_ctx = (AVHWFramesContext *)hw_frames_ref->data;
-  frames_ctx->format = AV_PIX_FMT_CUDA;
-  frames_ctx->sw_format = AV_PIX_FMT_BGR0; // Corresponds to DRM_FORMAT_XRGB8888
-  frames_ctx->width = width;
-  frames_ctx->height = height;
-  frames_ctx->initial_pool_size = 0;
+  AVHWFramesContext *framesCtx = (AVHWFramesContext *)hw_frames_ref->data;
+  framesCtx->format = AV_PIX_FMT_CUDA;
+  framesCtx->sw_format = AV_PIX_FMT_BGR0; // Corresponds to DRM_FORMAT_XRGB8888
+  framesCtx->width = width;
+  framesCtx->height = height;
+  framesCtx->initial_pool_size = 0;
 
   if (av_hwframe_ctx_init(hw_frames_ref) < 0)
   {
@@ -78,20 +81,28 @@ bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
     return printAVErrorAndReturn("Failed to initialize hw frames context");
   }
 
-  enc_ctx->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
+  encCtx->hw_frames_ctx = av_buffer_ref(hw_frames_ref);
   av_buffer_unref(&hw_frames_ref);
 
   // 4. Set video parameters
-  enc_ctx->width = width;
-  enc_ctx->height = height;
-  enc_ctx->time_base = av_make_q(1, fps);
-  enc_ctx->framerate = av_make_q(fps, 1);
-  enc_ctx->bit_rate = bitrate;
-  enc_ctx->gop_size = fps * 2; // Keyframe every 2 seconds
-  std::println("[Encoder] time_base={}/{} framerate={}/{}", enc_ctx->time_base.num, enc_ctx->time_base.den, enc_ctx->framerate.num, enc_ctx->framerate.den);
+  encCtx->width = width;
+  encCtx->height = height;
+  encCtx->time_base = av_make_q(1, fps);
+  encCtx->framerate = av_make_q(fps, 1);
+  encCtx->bit_rate = bitrate;
+  encCtx->gop_size = fps * 2; // Keyframe every 2 seconds
+  encCtx->profile = FF_PROFILE_H264_BASELINE;
+  encCtx->flags &= ~AV_CODEC_FLAG_GLOBAL_HEADER;
+  
+  av_opt_set(encCtx->priv_data, "preset", "p1", 0);
+  av_opt_set(encCtx->priv_data, "tune", "ull", 0); // Ultra Low Latency
+  av_opt_set(encCtx->priv_data, "zerolatency", "1", 0);
+  av_opt_set(encCtx->priv_data, "repeat_sps_pps", "1", 0); // NVENC option
+  
+  std::println("[Encoder] time_base={}/{} framerate={}/{}", encCtx->time_base.num, encCtx->time_base.den, encCtx->framerate.num, encCtx->framerate.den);
 
   // 5. Open the encoder
-  if (int ret = avcodec_open2(enc_ctx, codec, nullptr) < 0)
+  if (avcodec_open2(encCtx, codec, nullptr) < 0)
     return printAVErrorAndReturn(" Failed to open codec");
 
   isInitialized = true;
@@ -101,7 +112,7 @@ bool H264Encoder::initialize(int width, int height, int fps, int bitrate)
 
 void H264Encoder::encodeDmaBuf(int fd, int width, int height, int stride, uint64_t modifier)
 {
-  if (!enc_ctx)
+  if (!encCtx)
   {
     printAVErrorAndReturn("Encoder not initialized");
     close(fd); // Prevent FD leak
@@ -158,10 +169,12 @@ void H264Encoder::encodeDmaBuf(int fd, int width, int height, int stride, uint64
     return;
   }
 
-  cuda_frame->pts = pts_counter++;
+  auto now = std::chrono::steady_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - start_time).count();
+  cuda_frame->pts = (duration * this->fps) / 1000000;
 
   // --- STEP 3: Send to Hardware Encoder ---
-  if (int ret = avcodec_send_frame(enc_ctx, cuda_frame) < 0)
+  if (int ret = avcodec_send_frame(encCtx, cuda_frame) < 0)
     printAVErrorAndReturn("Error sending frame to encoder");
   else
     receiveAndProcessPackets();
@@ -175,20 +188,20 @@ void H264Encoder::encodeDmaBuf(int fd, int width, int height, int stride, uint64
 
 void H264Encoder::flush()
 {
-  if (!enc_ctx)
+  if (!encCtx)
     return;
   std::println("[Encoder] Flushing remaining frames...");
-  avcodec_send_frame(enc_ctx, nullptr);
+  avcodec_send_frame(encCtx, nullptr);
   receiveAndProcessPackets();
 }
 
 void H264Encoder::cleanup()
 {
   flush();
-  if (enc_ctx)
+  if (encCtx)
   {
-    avcodec_free_context(&enc_ctx);
-    enc_ctx = nullptr;
+    avcodec_free_context(&encCtx);
+    encCtx = nullptr;
   }
   if (cuda_device_ctx)
   {
@@ -199,7 +212,7 @@ void H264Encoder::cleanup()
 
 void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
 {
-  if (!enc_ctx)
+  if (!encCtx)
   {
     printAVErrorAndReturn("Encoder not initialized");
     close(fd);
@@ -221,7 +234,10 @@ void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
   sw_frame->height = height;
   sw_frame->linesize[0] = stride;
   sw_frame->data[0] = (uint8_t *)data;
-  sw_frame->pts = pts_counter++;
+
+  auto now = std::chrono::steady_clock::now();
+  auto duration = std::chrono::duration_cast<std::chrono::microseconds>(now - start_time).count();
+  sw_frame->pts = (duration * this->fps) / 1000000;
 
   struct MemFdContext
   {
@@ -250,7 +266,7 @@ void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
     return;
   }
 
-  if (int ret = av_hwframe_get_buffer(enc_ctx->hw_frames_ctx, hw_frame, 0) < 0)
+  if (int ret = av_hwframe_get_buffer(encCtx->hw_frames_ctx, hw_frame, 0) < 0)
   {
     printAVErrorAndReturn("Failed to allocate CUDA buffer for MemFd frame");
     av_frame_free(&hw_frame);
@@ -269,7 +285,7 @@ void H264Encoder::encodeMemFd(int fd, int width, int height, int stride)
 
   hw_frame->pts = sw_frame->pts;
 
-  if (int ret = avcodec_send_frame(enc_ctx, hw_frame) < 0)
+  if (int ret = avcodec_send_frame(encCtx, hw_frame) < 0)
     printAVErrorAndReturn("Error sending hw_frame to encoder");
   else
     receiveAndProcessPackets();

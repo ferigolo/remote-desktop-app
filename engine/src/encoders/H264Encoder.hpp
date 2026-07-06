@@ -4,6 +4,7 @@
 #include <print>
 #include <sys/mman.h>
 #include <functional>
+#include <chrono>
 
 extern "C"
 {
@@ -13,14 +14,16 @@ extern "C"
 #include <libavutil/hwcontext_cuda.h>
 #include <libavutil/pixdesc.h>
 #include <libdrm/drm_fourcc.h>
+#include <libavutil/opt.h>
 }
 
 class H264Encoder
 {
 private:
   AVBufferRef *cuda_device_ctx = nullptr;
-  AVCodecContext *enc_ctx = nullptr;
-  int64_t pts_counter = 0;
+  AVCodecContext *encCtx = nullptr;
+  int fps = 60;
+  std::chrono::steady_clock::time_point start_time;
 
   // Internal helper to pull encoded packets from the encoder
   void receiveAndProcessPackets();

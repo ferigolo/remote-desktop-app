@@ -121,8 +121,8 @@ void ScreencastPortal::createSession()
 void ScreencastPortal::selectSources()
 {
     QVariantMap selectOptions;
-    // We can specify multiple monitor types, cursor modes, etc here later
-    // selectOptions["types"] = QVariant::fromValue(uint(1)); // 1 = Monitor, 2 = Window
+    selectOptions["types"] = QVariant::fromValue(uint(3)); // 1 = Monitor, 2 = Window
+    selectOptions["cursor_mode"] = QVariant::fromValue(uint(2)); // 2 = Embedded cursor
 
     qInfo() << "🐧 [ScreencastPortal] Requesting SelectSources...";
     if (!callAndAwaitResponse("SelectSources", selectOptions))

@@ -5,11 +5,11 @@ import websockets
 
 
 class SignalingMessageType(IntEnum):
-    Register = 1
-    Offer = 2
-    Answer = 3
-    Candidate = 4
-    Unknown = 5
+    Register = 0
+    Offer = 1
+    Answer = 2
+    Candidate = 3
+    RequestOffer = 4
 
 
 # Dictionary to keep track of connected peers. Format: { "id": websocket_connection }
@@ -21,7 +21,6 @@ async def handler(websocket: websockets.ServerConnection):
     try:
         async for message in websocket:
             data = json.loads(message)
-            print(message)
 
             # 1. Registration Phase: A peer identifies itself
             if data.get("type") == SignalingMessageType.Register:
@@ -33,7 +32,7 @@ async def handler(websocket: websockets.ServerConnection):
             # 2. Relaying Phase: Forward messages (SDP or ICE) to the target
             target_id = data.get("target")
             if target_id and target_id in peers:
-                print(f"➡️ Relaying message from {current_id} to {target_id}")
+                print(f"➡️  Relaying message from {current_id} to {target_id}")
 
                 # Forward the exact message to the target, appending the sender's ID
                 data["sender"] = current_id

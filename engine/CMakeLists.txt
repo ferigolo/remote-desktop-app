@@ -42,7 +42,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
 
     # Because pkg-config is installed, we use it to find DBus and PipeWire (they are not part of the CMake modules)
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
-    pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter)
+    pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter libswscale)
 
     include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS} "/usr/local/cuda/include") # Where the headers PipeWire and FFmpeg are. So when we write '#include <pipewire/pipewire.h>' it does not crash
     link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS} "/usr/local/cuda/lib64") # Tells linker where are the binaries (.so) of these packages
@@ -86,9 +86,7 @@ FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download
 FetchContent_MakeAvailable(json)
 
 add_executable(core-engine ${SOURCE_FILES})
-
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
-
 target_link_libraries(core-engine PRIVATE SDL3::SDL3 datachannel nlohmann_json::nlohmann_json)
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -97,3 +95,19 @@ endif()
 
 # Required by Rust's cmake crate to output the binary correctly
 install(TARGETS core-engine DESTINATION bin)
+
+# --- NATIVE CLIENT ---
+set(CLIENT_SOURCE_FILES
+    src/client/main.cpp
+    src/client/ClientApp.cpp
+    src/client/ClientWebRtcManager.cpp
+    src/client/H264Decoder.cpp
+)
+
+add_executable(native-client ${CLIENT_SOURCE_FILES})
+target_compile_options(native-client PRIVATE -std=c++26 -O3 -Wall -Wextra)
+target_link_libraries(native-client PRIVATE SDL3::SDL3 datachannel nlohmann_json::nlohmann_json)
+
+if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
+    target_link_libraries(native-client PRIVATE ${FFMPEG_LIBRARIES})
+endif()

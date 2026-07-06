@@ -10,7 +10,7 @@ enum class SignalingMessageType
   Offer,
   Answer,
   Candidate,
-  Unknown
+  RequestOffer
 };
 
 class WebRtcManager
@@ -21,6 +21,8 @@ private:
   std::shared_ptr<rtc::PeerConnection> pc;
   std::shared_ptr<rtc::DataChannel> dataChannel;
   std::shared_ptr<rtc::Track> videoTrack;
+  std::shared_ptr<rtc::RtpPacketizationConfig> rtpConfig;
+  uint32_t videoFps = 60;
 
   constexpr SignalingMessageType
   parseMessageType(const std::string &typeStr);
@@ -28,6 +30,8 @@ private:
 public:
   WebRtcManager();
   ~WebRtcManager();
+
+  void setVideoFps(uint32_t fps);
 
   // Connects to the Python Signaling Server
   void connectSignaling(const std::string &url);
