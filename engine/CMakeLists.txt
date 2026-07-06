@@ -11,11 +11,33 @@ if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
 endif()
 
-# We need to tell CMake to look /usr/local
-list(APPEND CMAKE_PREFIX_PATH "/usr/local/lib/cmake" "/usr/local/lib/cmake/SDL3")
+include(FetchContent)
 
-find_package(SDL3 REQUIRED) # Looks into /usr/lib or /usr/local/lib for SDL3
-include_directories(${SDL3_INCLUDE_DIRS}) # Injects SDL3 dirs as flags so the compiler can find the header files
+# Fetch and build SDL3
+set(SDL_TEST OFF CACHE BOOL "" FORCE) # Disable SDL tests to save build time
+FetchContent_Declare(
+    SDL3
+    GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+    GIT_TAG release-3.4.12 # Use the latest stable tag
+)
+FetchContent_MakeAvailable(SDL3)
+
+# Fetch and build lidatachannel (WebRTC)
+# We only want the core library, no extra bloat
+set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
+set(NO_TESTS ON CACHE BOOL "" FORCE)
+set(NO_WEBSOCKET OFF CACHE BOOL "" FORCE) # Keep WebSockets ON for signaling
+# Allow compiling older dependencies (fixes the plog CMake error)
+set(CMAKE_POLICY_VERSION_MINIMUM 3.10 CACHE STRING "" FORCE)
+FetchContent_Declare(
+    libdatachannel
+    GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
+    GIT_TAG        v0.24.5
+)
+FetchContent_MakeAvailable(libdatachannel)
+
+FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
+FetchContent_MakeAvailable(json)
 
 set(SOURCE_FILES 
     src/main.cpp 
@@ -66,24 +88,6 @@ elseif(APPLE)
     )
 endif()
                  
-include(FetchContent)
-# We only want the core library, no extra bloat
-set(NO_EXAMPLES ON CACHE BOOL "" FORCE)
-set(NO_TESTS ON CACHE BOOL "" FORCE)
-set(NO_WEBSOCKET OFF CACHE BOOL "" FORCE) # Keep WebSockets ON for signaling
-# Allow compiling older dependencies (fixes the plog CMake error)
-set(CMAKE_POLICY_VERSION_MINIMUM 3.10 CACHE STRING "" FORCE)
-
-# Fetch and build lidatachannel (WebRTC)
-FetchContent_Declare(
-    libdatachannel
-    GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
-    GIT_TAG        v0.21.2
-)
-FetchContent_MakeAvailable(libdatachannel)
-
-FetchContent_Declare(json URL https://github.com/nlohmann/json/releases/download/v3.12.0/json.tar.xz)
-FetchContent_MakeAvailable(json)
 
 add_executable(core-engine ${SOURCE_FILES})
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
