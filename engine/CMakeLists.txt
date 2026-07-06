@@ -102,6 +102,12 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         Qt6::DBus
     )
 elseif(APPLE)
+    if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|ARM64")
+        message(STATUS "ARM Architecture detected. Enabling Hardware Decoder.")
+    else()
+        message(STATUS "x86 Architecture detected. Falling back to Software Decoder.")
+    endif()
+
     target_link_libraries(core-engine PRIVATE 
         ${SCREENCAPTUREKIT} 
         ${COREMEDIA} 
@@ -116,8 +122,8 @@ install(TARGETS core-engine DESTINATION bin)
 set(CLIENT_SOURCE_FILES
     src/client/main.cpp
     src/client/ClientApp.cpp
-    src/client/ClientWebRtcManager.cpp
-    src/client/H264Decoder.cpp
+    src/client/network/ClientWebRtcManager.cpp
+    src/client/decoders/SoftwareDecoder.cpp
 )
 
 add_executable(native-client ${CLIENT_SOURCE_FILES})

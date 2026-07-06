@@ -58,8 +58,8 @@ void WebRtcManager::initializeDataChannel() {
       []() { std::println("✅ [WebRtcManager] Input DataChannel Opened!"); });
   dataChannel->onMessage([](std::variant<rtc::binary, rtc::string> data) {
     if (std::holds_alternative<rtc::binary>(data)) {
-      // No futuro, aqui receberemos os pacotes binários do navegador
-      // e vamos repassá-los para o /dev/uinput do Linux!
+      // TODO: receive binary packets from client and pass them than through
+      // Linux /dev/uinput
       std::println("🖱️ [WebRtcManager] Received binary input packet!");
     } else if (std::holds_alternative<rtc::string>(data)) {
       std::string text = std::get<rtc::string>(data);
@@ -80,10 +80,8 @@ void WebRtcManager::initializeVideoTrack() {
                                      rtc::Description::Direction::SendOnly);
   videoMedia.addH264Codec(payloadType);
   videoMedia.addSSRC(ssrc, cname);
-
   videoTrack = pc->addTrack(videoMedia);
 
-  // 1. Configura a empacotadora RTP
   this->rtpConfig = std::make_shared<rtc::RtpPacketizationConfig>(
       ssrc, cname, payloadType, rtc::H264RtpPacketizer::defaultClockRate);
 
@@ -92,7 +90,7 @@ void WebRtcManager::initializeVideoTrack() {
   auto packetizer = std::make_shared<rtc::H264RtpPacketizer>(
       rtc::NalUnit::Separator::StartSequence, this->rtpConfig);
 
-  // 3. Adiciona a capacidade de reportar perdas de pacote pro navegador (RTCP)
+  // Reporting packet loss to the client
   auto srReporter = std::make_shared<rtc::RtcpSrReporter>(this->rtpConfig);
   packetizer->addToChain(srReporter);
   auto nackResponder = std::make_shared<rtc::RtcpNackResponder>();
@@ -106,9 +104,7 @@ void WebRtcManager::setVideoFps(uint32_t fps) {
 }
 
 void WebRtcManager::sendVideoPacket(const uint8_t* data, size_t size) {
-  if (!videoTrack) return;
-
-  if (!videoTrack->isOpen())
+  if (!(videoTrack && videoTrack->isOpen()))
     // std::println("⏳ [WebRtcManager] videoTrack not open yet, dropping
     // packet...");
     return;
@@ -131,7 +127,7 @@ void WebRtcManager::connectSignaling(const std::string& url) {
     // Send our registration JSON (can use raw string literal for simplicity)
     json regMsg;
     regMsg["type"] = SignalingMessageType::Register;
-    regMsg["id"] = "Core-Engine";
+    regMsg["id"] = "";
     ws->send(regMsg.dump());
   });
 

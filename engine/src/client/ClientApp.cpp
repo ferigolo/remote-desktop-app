@@ -4,8 +4,8 @@
 #include <iostream>
 #include <print>
 
-#include "ClientWebRtcManager.hpp"
-#include "H264Decoder.hpp"
+#include "decoders/SoftwareDecoder.hpp"
+#include "network/ClientWebRtcManager.hpp"
 
 ClientApp::ClientApp() {}
 
@@ -31,7 +31,12 @@ bool ClientApp::initialize(const std::string& signalingUrl) {
   renderer = SDL_CreateRenderer(window, nullptr);
   if (!renderer) return false;
 
-  decoder = std::make_unique<H264Decoder>();
+  int hostWidth = 1920, hostHeight = 1080;
+  if (!SDL_SetRenderLogicalPresentation(renderer, hostWidth, hostHeight,
+                                        SDL_LOGICAL_PRESENTATION_LETTERBOX))
+    std::println(std::cerr, "Warning: Letterboxing failed: {}", SDL_GetError());
+
+  decoder = std::make_unique<SoftwareDecoder>();
   if (!decoder->initialize()) {
     std::println("Failed to initialize H264 Decoder");
     return false;
@@ -93,9 +98,7 @@ void ClientApp::run() {
 
     SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
     SDL_RenderClear(renderer);
-    if (texture) {
-      SDL_RenderTexture(renderer, texture, nullptr, nullptr);
-    }
+    if (texture) SDL_RenderTexture(renderer, texture, nullptr, nullptr);
     SDL_RenderPresent(renderer);
 
     SDL_Delay(5);  // Keep CPU usage low in main thread
