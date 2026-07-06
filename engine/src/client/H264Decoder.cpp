@@ -34,7 +34,7 @@ bool H264Decoder::initialize() {
     rgbFrame = av_frame_alloc();
     isInitialized = true;
     
-    // Suprime os logs temporários de "PPS 0 referenced" do FFmpeg até receber o IDR frame.
+    // Omits "PPS 0 referenced" FFmpeg logs until get the IDR frame.
     av_log_set_level(AV_LOG_QUIET);
     
     std::println("✅ [Decoder] H264 Decoder Initialized");
@@ -95,9 +95,8 @@ void H264Decoder::decode(const uint8_t* data, size_t size) {
                 std::println("✅ [Decoder] Successfully decoded and converted frame #{} ({}x{})", frameCount, frame->width, frame->height);
             }
 
-            if (onFrameDecoded) {
+            if (onFrameDecoded)
                 onFrameDecoded(rgbFrame->data[0], rgbFrame->width, rgbFrame->height, rgbFrame->linesize[0]);
-            }
         }
     }
     av_packet_free(&pkt);
