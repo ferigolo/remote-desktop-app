@@ -19,6 +19,7 @@ FetchContent_Declare(
     SDL3
     GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
     GIT_TAG release-3.4.12
+    FIND_PACKAGE_ARGS NAMES SDL3 # First tries to find an existing SDL3
 )
 
 # Fetch and Compile libdatachannel (WebRTC)
@@ -30,6 +31,7 @@ FetchContent_Declare(
     libdatachannel
     GIT_REPOSITORY https://github.com/paullouisageneau/libdatachannel.git
     GIT_TAG        v0.24.5
+    FIND_PACKAGE_ARGS NAMES LibDataChannel
 )
 
 # Fetch nlohmann_json (Direct compressed download for speed)
@@ -56,7 +58,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/capturers/linux/ScreencastPortal.cpp
         src/utils/linux/PlatformUtils.cpp
         src/capturers/LinuxCapturer.cpp
-        src/encoders/BaseEncoder.cpp
     )
 
     # Find the Qt6 package installed on the system via apt
@@ -96,6 +97,7 @@ target_link_libraries(core-engine PRIVATE
 find_package(CUDAToolkit QUIET)
 if(CUDAToolkit_FOUND)
     message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
+    target_sources(core-engine PRIVATE src/encoders/nvidia/CudaEncoder.cpp)
     target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
     target_compile_definitions(core-engine PRIVATE HAVE_CUDA)
     # This properly links the CUDA runtime without hardcoding paths:
@@ -108,13 +110,17 @@ endif()
 find_package(PkgConfig QUIET)                
 pkg_check_modules(LIBVA QUIET libva libva-drm)
 if(LIBVA_FOUND)
+    message(STATUS "🟢 Intel QSV Toolkit found: Enabling QSV support...")
     list(APPEND CLIENT_SOURCE_FILES src/client/decoders/IntelIrisDecoder.cpp)         
     add_compile_definitions(HAVE_INTEL_QSV)                                           
-endif()       
+endif()
 
 # Link system libraries
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_target_properties(core-engine PROPERTIES AUTOMOC ON)
+    if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+        set(ENV{PIPEWIRE_DEBUG} 4)
+    endif()
     target_link_libraries(core-engine PRIVATE 
         ${PIPEWIRE_LIBRARIES} 
         ${FFMPEG_LIBRARIES} 

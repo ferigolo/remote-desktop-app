@@ -10,7 +10,6 @@ bool LinuxCapturer::start(std::function<void(const VideoFrame &)> onFrameReceive
   std::println("🐧 [LinuxCapturer] Starting Wayland capture process...");
 
   ScreencastPortal sp{};
-
   if (!sp.negotiateScreencast())
   {
     std::println("❌ [LinuxCapturer] Failed to negotiate screencast. User denied or error ocurred");

@@ -11,6 +11,17 @@
         "CMAKE_CXX_COMPILER": "g++-14",
         "CMAKE_BUILD_TYPE": "Release"
       }
+    },
+    {
+      "name": "gcc-16-debug",
+      "displayName": "GCC 16 debug Build",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "gcc-16",
+        "CMAKE_CXX_COMPILER": "g++-16",
+        "CMAKE_BUILD_TYPE": "Debug"
+      }
     }
   ]
 }

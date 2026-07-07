@@ -1,30 +1,39 @@
 #include "CoreEngine.hpp"
+
+#include <SDL3/SDL.h>
+
+#include <cmath>
+#include <print>
+#include <string_view>
+#include <thread>
+
 #include "configurers/CoreEngineConfigurer.hpp"
 #include "utils/PlatformUtils.hpp"
-#include <SDL3/SDL.h>
-#include <print>
-#include <thread>
-#include <cmath>
-#include <string_view>
 
-CoreEngine::CoreEngine() : window(nullptr), renderer(nullptr), is_running(false) {}
+#ifdef HAVE_CUDA
+#include "encoders/nvidia/CudaEncoder.hpp"
+#endif
 
-CoreEngine::~CoreEngine()
-{
-  cleanup();
-}
+CoreEngine::CoreEngine()
+    : window(nullptr), renderer(nullptr), is_running(false) {}
 
-bool CoreEngine::initialize()
-{
+CoreEngine::~CoreEngine() { cleanup(); }
+
+bool CoreEngine::initialize() {
   std::println("🚀 [Core] Starting Headless Remote Desktop Host...");
 
   initializeWebRtcManager();
 
-  encoder = std::make_unique<H264Encoder>();
-  capturer = ScreenCapturer::create();
+#ifdef HAVE_CUDA
+  encoder = std::make_unique<CudaEncoder>(nullptr);
+#else
+  std::println(stderr, "❌ [Core] No hardware encoder available on this system!");
+  // Throwing an exception or initializing a software encoder would go here
+#endif
 
-  capturer->start([this](const VideoFrame &frame)
-                  { handleIncomingFrame(frame); });
+  capturer = ScreenCapturer::create();
+  capturer->start(
+      [this](const VideoFrame& frame) { handleIncomingFrame(frame); });
 
   is_running = true;
   renderLoop();
@@ -32,30 +41,25 @@ bool CoreEngine::initialize()
   return true;
 }
 
-void CoreEngine::handleIncomingFrame(const VideoFrame &frame)
-{
-  if (!encoder->isInitialized)
-  {
-    if (webRtcManager) {
-      webRtcManager->setVideoFps(frame.fps);
-    }
-    
+void CoreEngine::handleIncomingFrame(const VideoFrame& frame) {
+  if (!encoder->IsInitialized()) {
+    if (webRtcManager) webRtcManager->setVideoFps(frame.fps);
+
     encoder->initialize(frame.width, frame.height, frame.fps);
-    encoder->onEncodedPacketCallback = [this](AVPacket *p)
-    {
-      if (webRtcManager)
-        webRtcManager->sendVideoPacket(p->data, p->size);
+    encoder->onEncodedPacketCallback = [this](AVPacket* p) {
+      if (webRtcManager) webRtcManager->sendVideoPacket(p->data, p->size);
     };
   }
 
   if (frame.type == FrameMemoryType::DmaBuf)
-    encoder->encodeDmaBuf(frame.fd, frame.width, frame.height, frame.stride, frame.drmModifier);
+    encoder->encode(frame.fd, frame.width, frame.height, frame.stride,
+                    frame.drmModifier, frame.spaFormat);
   else
-    encoder->encodeMemFd(frame.fd, frame.width, frame.height, frame.stride);
+    encoder->encode(frame.fd, frame.width, frame.height, frame.stride,
+                    frame.spaFormat);
 }
 
-void CoreEngine::initializeWebRtcManager()
-{
+void CoreEngine::initializeWebRtcManager() {
   // Instantiate signaling server
   webRtcManager = std::make_unique<WebRtcManager>();
   webRtcManager->connectSignaling("ws://0.0.0.0:8080");
@@ -64,31 +68,24 @@ void CoreEngine::initializeWebRtcManager()
   webRtcManager->initializeVideoTrack();
 }
 
-void CoreEngine::renderLoop()
-{
+void CoreEngine::renderLoop() {
   while (is_running)
     std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
-void CoreEngine::cleanup()
-{
-  if (capturer)
-    capturer.reset();
-  if (encoder)
-    encoder.reset();
-  if (webRtcManager)
-    webRtcManager.reset();
+void CoreEngine::cleanup() {
+  if (capturer) capturer.reset();
+  if (encoder) encoder.reset();
+  if (webRtcManager) webRtcManager.reset();
 
   std::println("🧹 [Core] Released all resources");
 }
 
-void CoreEngine::printRendererInfo() const
-{
+void CoreEngine::printRendererInfo() const {
 #ifndef NDEBUG
-  if (!renderer)
-    return;
+  if (!renderer) return;
 
-  const char *backendName = SDL_GetRendererName(renderer);
+  const char* backendName = SDL_GetRendererName(renderer);
   std::println(" [Core] Using {} backend", backendName);
 
   // Delegando o trabalho sujo e OS-specific para as Utils

@@ -48,14 +48,33 @@ Separating the "mirror effect" between two distinct machines over the network. *
 1. Signaling Server in Python (_asyncio_ \+ _websockets_).
 2. Integration of libwebrtc into the C++ code.
 3. Packaging of captured frames (H.264/H.265/AV1) and transmission via RTP/UDP tracks.
-4. Hardware decoding logic on the client side.
+4. Implementation of the WebRTC connection manager on both Host and Client.
 
 **Functional Tests:**
 
 - **Handshake Test (Mock):** Two clients run locally, exchange SDP (Session Description Protocol) files and ICE candidates through the Python server, and establish the P2P tunnel.
 - **P2P Streaming Test (Local Network):** Run the Host and Client on two physical computers on the same LAN. Measure the frame rate (FPS), packet loss, and glass-to-glass latency.
 
-## **Phase 5: Input Injection (Remote Control)**
+## **Phase 5: Client Decoding**
+
+Receiving the transmitted bitstream and efficiently decoding it on the client's GPU before passing it to the rendering pipeline. **What to build:**
+
+1. Extraction of the encoded frames from the WebRTC video track.
+2. Hardware decoding logic on the client side.
+
+### Decoders:
+
+1. Software decoder (Any)
+2. CUDA decoder (Nvidia)
+3. VideoToolbox decoder (Apple Silicon)
+4. QVC decoder (Intel)
+
+**Functional Tests:**
+
+- **Decoding Performance Test:** The client receives a high-bitrate stream and decodes it. CPU usage should remain minimal while maintaining a consistent frame rate, proving that hardware acceleration is active.
+- **Visual Artifact Test:** Validate that the decoded frames do not suffer from tearing, smearing, or color shifts compared to the host's original screen.
+
+## **Phase 6: Input Injection (Remote Control)**
 
 The final stage: transforming the video _streamer_ into a full bidirectional remote control tool.**What to build:**
 
