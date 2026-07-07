@@ -13,13 +13,20 @@ extern "C" {
 #include <libswscale/swscale.h>
 }
 
+// Instead of the VRAM -> RAM -> VRAM roundtrip, the pixels stay locked in the
+// GPU's memory the entire time, and we simply pass a "pointer" between FFmpeg
+// and the graphics API using a DMA-BUF.
 class BaseDecoder {
  public:
   virtual ~BaseDecoder() = default;
 
   virtual bool initialize() = 0;
   virtual void decode(const uint8_t* data, size_t size) = 0;
-  std::function<void(const uint8_t* rgbaData, int width, int height, int pitch)>
+  // std::function<void(const uint8_t* rgbaData, int width, int height, int
+  // pitch)>
+  //     onFrameDecoded;
+  std::function<void(const uint8_t* yPlane, int yPitch, const uint8_t* uvPlane,
+                     int uvPitch, int width, int height)>
       onFrameDecoded;
 
  protected:

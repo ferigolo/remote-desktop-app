@@ -8,7 +8,6 @@
 #include "decoders/BaseDecoder.hpp"
 
 class ClientWebRtcManager;
-class SoftwareDecoder;
 
 class ClientApp {
  public:
@@ -19,10 +18,9 @@ class ClientApp {
   void run();
 
  private:
-  void renderFrame(const uint8_t* rgbaData, int width, int height, int pitch);
-  std::unique_ptr<BaseDecoder> createOptimalDecoder() {
+  void renderFrame(const uint8_t* yPlane, int yPitch, const uint8_t* uvPlane,
+                   int uvPitch, int width, int height);
 
-  };
 
   SDL_Window* window{};
   SDL_Renderer* renderer{};
@@ -31,12 +29,14 @@ class ClientApp {
   int texHeight = 0;
 
   std::unique_ptr<ClientWebRtcManager> rtcManager;
-  std::unique_ptr<SoftwareDecoder> decoder;
+  std::unique_ptr<BaseDecoder> decoder;
   bool isRunning = false;
 
   // Cross-thread rendering synchronization
   std::mutex frameMutex;
-  std::vector<uint8_t> frameBuffer;
-  int framePitch = 0;
+  std::vector<uint8_t> frameBufferY;
+  std::vector<uint8_t> frameBufferUV;
+  int framePitchY = 0;
+  int framePitchUV = 0;
   bool frameReady = false;
 };

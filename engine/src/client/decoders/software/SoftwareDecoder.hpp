@@ -1,7 +1,7 @@
 #pragma once
 #include <functional>
 
-#include "BaseDecoder.hpp"
+#include "../BaseDecoder.hpp"
 
 class SoftwareDecoder : public BaseDecoder {
  public:
@@ -13,6 +13,6 @@ class SoftwareDecoder : public BaseDecoder {
 
  private:
   AVFrame* frame{};
-  AVFrame* rgbFrame{};
+  AVFrame* swFrame{};
   SwsContext* swsCtx{};
 };

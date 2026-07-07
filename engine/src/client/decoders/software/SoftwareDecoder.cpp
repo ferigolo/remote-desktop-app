@@ -8,16 +8,16 @@ SoftwareDecoder::SoftwareDecoder() {}
 SoftwareDecoder::~SoftwareDecoder() {
   if (swsCtx) sws_freeContext(swsCtx);
   if (frame) av_frame_free(&frame);
-  if (rgbFrame) av_frame_free(&rgbFrame);
+  if (swFrame) av_frame_free(&swFrame);
   if (codecCtx) avcodec_free_context(&codecCtx);
 }
 
 bool SoftwareDecoder::initialize() {
   const AVCodec* codec = avcodec_find_decoder(AV_CODEC_ID_H264);
-  if (!codec) {
-    std::println(std::cerr, "Software H264 decoder not found");
-    return false;
-  }
+  if (!codec) return printAvErrorAndReturn(" Software H264 decoder not found");
+  std::println(
+      "⚠️ [Decoder] Hardware decoder unavailable. Falling back to Software "
+      "Decoder");
 
   codecCtx = avcodec_alloc_context3(codec);
   if (!codecCtx) return false;
@@ -32,7 +32,7 @@ bool SoftwareDecoder::initialize() {
   }
 
   frame = av_frame_alloc();
-  rgbFrame = av_frame_alloc();
+  swFrame = av_frame_alloc();
   isInitialized = true;
 
   // Omits "PPS 0 referenced" FFmpeg logs until get the IDR frame.
@@ -79,18 +79,18 @@ void SoftwareDecoder::decode(const uint8_t* data, size_t size) {
       if (!swsCtx) {
         swsCtx = sws_getContext(frame->width, frame->height,
                                 (AVPixelFormat)frame->format, frame->width,
-                                frame->height, AV_PIX_FMT_RGBA,
+                                frame->height, AV_PIX_FMT_NV12,
                                 SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
 
-        rgbFrame->format = AV_PIX_FMT_RGBA;
-        rgbFrame->width = frame->width;
-        rgbFrame->height = frame->height;
-        av_image_alloc(rgbFrame->data, rgbFrame->linesize, frame->width,
-                       frame->height, AV_PIX_FMT_RGBA, 32);
+        swFrame->format = AV_PIX_FMT_NV12;
+        swFrame->width = frame->width;
+        swFrame->height = frame->height;
+        av_image_alloc(swFrame->data, swFrame->linesize, frame->width,
+                       frame->height, AV_PIX_FMT_NV12, 32);
       }
 
       sws_scale(swsCtx, frame->data, frame->linesize, 0, frame->height,
-                rgbFrame->data, rgbFrame->linesize);
+                swFrame->data, swFrame->linesize);
 
       static int frameCount = 0;
       if (frameCount++ % 60 == 0) {
@@ -100,8 +100,8 @@ void SoftwareDecoder::decode(const uint8_t* data, size_t size) {
       }
 
       if (onFrameDecoded)
-        onFrameDecoded(rgbFrame->data[0], rgbFrame->width, rgbFrame->height,
-                       rgbFrame->linesize[0]);
+        onFrameDecoded(swFrame->data[0], swFrame->linesize[0], swFrame->data[1],
+                       swFrame->linesize[1], swFrame->width, swFrame->height);
     }
   }
   av_packet_free(&pkt);

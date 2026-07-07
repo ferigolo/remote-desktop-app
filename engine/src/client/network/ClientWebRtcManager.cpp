@@ -40,7 +40,7 @@ void ClientWebRtcManager::initializePeerConnection() {
   pc->onLocalCandidate([this](rtc::Candidate candidate) {
     json msg;
     msg["type"] = SignalingMessageType::Candidate;
-    msg["target"] = "";
+    msg["target"] = "host";
     msg["candidate"] = candidate.candidate();
     msg["sdpMid"] = candidate.mid();
     ws->send(msg.dump());
@@ -101,7 +101,7 @@ void ClientWebRtcManager::connectSignaling(const std::string& url) {
 
     json reqMsg;
     reqMsg["type"] = SignalingMessageType::RequestOffer;
-    reqMsg["target"] = "";
+    reqMsg["target"] = "host";
     ws->send(reqMsg.dump());
   });
 

@@ -4,7 +4,7 @@
 #include <iostream>
 #include <print>
 
-#include "decoders/SoftwareDecoder.hpp"
+#include "decoders/DecoderFactory.hpp"
 #include "network/ClientWebRtcManager.hpp"
 
 ClientApp::ClientApp() {}
@@ -36,15 +36,16 @@ bool ClientApp::initialize(const std::string& signalingUrl) {
                                         SDL_LOGICAL_PRESENTATION_LETTERBOX))
     std::println(std::cerr, "Warning: Letterboxing failed: {}", SDL_GetError());
 
-  decoder = std::make_unique<SoftwareDecoder>();
+  decoder = createOptimalDecoder();
   if (!decoder->initialize()) {
     std::println("Failed to initialize H264 Decoder");
     return false;
   }
 
-  decoder->onFrameDecoded = [this](const uint8_t* rgbaData, int width,
-                                   int height, int pitch) {
-    this->renderFrame(rgbaData, width, height, pitch);
+  decoder->onFrameDecoded = [this](const uint8_t* yPlane, int yPitch,
+                                   const uint8_t* uvPlane, int uvPitch,
+                                   int width, int height) {
+    this->renderFrame(yPlane, yPitch, uvPlane, uvPitch, width, height);
   };
 
   rtcManager = std::make_unique<ClientWebRtcManager>();
@@ -56,15 +57,20 @@ bool ClientApp::initialize(const std::string& signalingUrl) {
   return true;
 }
 
-void ClientApp::renderFrame(const uint8_t* rgbaData, int width, int height,
-                            int pitch) {
+void ClientApp::renderFrame(const uint8_t* yPlane, int yPitch,
+                            const uint8_t* uvPlane, int uvPitch, int width,
+                            int height) {
   std::lock_guard<std::mutex> lock(frameMutex);
   texWidth = width;
   texHeight = height;
-  framePitch = pitch;
-  size_t dataSize = pitch * height;
-  if (frameBuffer.size() != dataSize) frameBuffer.resize(dataSize);
-  std::memcpy(frameBuffer.data(), rgbaData, dataSize);
+  framePitchY = yPitch;
+  framePitchUV = uvPitch;
+  size_t ySize = yPitch * height;
+  size_t uvSize = uvPitch * ((height + 1) / 2);
+  if (frameBufferY.size() != ySize) frameBufferY.resize(ySize);
+  if (frameBufferUV.size() != uvSize) frameBufferUV.resize(uvSize);
+  std::memcpy(frameBufferY.data(), yPlane, ySize);
+  std::memcpy(frameBufferUV.data(), uvPlane, uvSize);
   frameReady = true;
 }
 
@@ -85,13 +91,14 @@ void ClientApp::run() {
         if (!texture || currentTexWidth != texWidth ||
             currentTexHeight != texHeight) {
           if (texture) SDL_DestroyTexture(texture);
-          texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_RGBA32,
+          texture = SDL_CreateTexture(renderer, SDL_PIXELFORMAT_NV12,
                                       SDL_TEXTUREACCESS_STREAMING, texWidth,
                                       texHeight);
           currentTexWidth = texWidth;
           currentTexHeight = texHeight;
         }
-        SDL_UpdateTexture(texture, nullptr, frameBuffer.data(), framePitch);
+        SDL_UpdateNVTexture(texture, nullptr, frameBufferY.data(), framePitchY,
+                            frameBufferUV.data(), framePitchUV);
         frameReady = false;
       }
     }

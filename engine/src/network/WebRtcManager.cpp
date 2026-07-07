@@ -30,7 +30,7 @@ void WebRtcManager::initializePeerConnection() {
   pc->onLocalCandidate([this](rtc::Candidate candidate) {
     std::println(
         "🧊 [WebRtcManager] Found ICE Candidate, sending to signaling "
-        "server... ");
+        "server...");
     json msg;
     msg["type"] = SignalingMessageType::Candidate;
     msg["target"] = "client";  // Send to the web browser
@@ -124,10 +124,10 @@ void WebRtcManager::connectSignaling(const std::string& url) {
 
   ws->onOpen([this]() {
     std::println("🌐 [WebRtcManager] Connected to Signaling Server!");
-    // Send our registration JSON (can use raw string literal for simplicity)
+    // Send our registration JSON
     json regMsg;
     regMsg["type"] = SignalingMessageType::Register;
-    regMsg["id"] = "";
+    regMsg["id"] = "host";
     ws->send(regMsg.dump());
   });
 
@@ -153,8 +153,6 @@ void WebRtcManager::connectSignaling(const std::string& url) {
         std::println(
             "🤝 [WebRtcManager] Client requested connection! Generating "
             "Offer...");
-        // Isso aciona o onLocalDescription ali de cima, que envia o JSON pro
-        // JS!
         pc->setLocalDescription();
         break;
       }

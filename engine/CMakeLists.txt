@@ -56,7 +56,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/capturers/linux/ScreencastPortal.cpp
         src/utils/linux/PlatformUtils.cpp
         src/capturers/LinuxCapturer.cpp
-        src/encoders/H264Encoder.cpp
+        src/encoders/BaseEncoder.cpp
     )
 
     # Find the Qt6 package installed on the system via apt
@@ -67,9 +67,9 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
     pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter libswscale)
 
-    include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS} "/usr/local/cuda/include")
-    link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS} "/usr/local/cuda/lib64")
-    
+    include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
+    link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS})
+
     add_compile_definitions(__linux__)
     
 elseif(APPLE)
@@ -92,6 +92,26 @@ target_link_libraries(core-engine PRIVATE
     nlohmann_json::nlohmann_json
 )
 
+# Check for the CUDA SDK/Toolkit
+find_package(CUDAToolkit QUIET)
+if(CUDAToolkit_FOUND)
+    message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
+    target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_compile_definitions(core-engine PRIVATE HAVE_CUDA)
+    # This properly links the CUDA runtime without hardcoding paths:
+    target_link_libraries(core-engine PRIVATE CUDA::cudart)
+else()
+    message(STATUS "⚪ CUDA Toolkit not found: Skipping CUDA configuration...")
+endif()
+
+# Intel QSV / VAAPI Detection                                   
+find_package(PkgConfig QUIET)                
+pkg_check_modules(LIBVA QUIET libva libva-drm)
+if(LIBVA_FOUND)
+    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/IntelIrisDecoder.cpp)         
+    add_compile_definitions(HAVE_INTEL_QSV)                                           
+endif()       
+
 # Link system libraries
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     set_target_properties(core-engine PROPERTIES AUTOMOC ON)
@@ -108,6 +128,9 @@ elseif(APPLE)
         message(STATUS "x86 Architecture detected. Falling back to Software Decoder.")
     endif()
 
+    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/AppleDecoder.cpp)             
+    add_compile_definitions(HAVE_APPLE_VT)
+
     target_link_libraries(core-engine PRIVATE 
         ${SCREENCAPTUREKIT} 
         ${COREMEDIA} 
@@ -123,7 +146,8 @@ set(CLIENT_SOURCE_FILES
     src/client/main.cpp
     src/client/ClientApp.cpp
     src/client/network/ClientWebRtcManager.cpp
-    src/client/decoders/SoftwareDecoder.cpp
+    src/client/decoders/software/SoftwareDecoder.cpp
+    src/client/decoders/DecoderFactory.cpp 
 )
 
 add_executable(native-client ${CLIENT_SOURCE_FILES})
