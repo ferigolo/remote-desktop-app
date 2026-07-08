@@ -96,7 +96,7 @@ target_link_libraries(core-engine PRIVATE
 # Check for the CUDA SDK/Toolkit
 find_package(CUDAToolkit QUIET)
 if(CUDAToolkit_FOUND)
-    message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
+    message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA encoder...")
     target_sources(core-engine PRIVATE src/encoders/nvidia/CudaEncoder.cpp)
     target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
     target_compile_definitions(core-engine PRIVATE HAVE_CUDA)
@@ -164,6 +164,14 @@ target_link_libraries(native-client PRIVATE
     datachannel 
     nlohmann_json::nlohmann_json
 )
+
+if(CUDAToolkit_FOUND)                                                              
+    message(STATUS "🟢 Enabling CUDA Decoder for client...")   
+    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp)    
+    target_include_directories(native-client PRIVATE ${CUDAToolkit_INCLUDE_DIRS})  
+    target_compile_definitions(native-client PRIVATE HAVE_CUDA)
+    target_link_libraries(native-client PRIVATE CUDA::cudart)
+endif()    
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(native-client PRIVATE ${FFMPEG_LIBRARIES})
