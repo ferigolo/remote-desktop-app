@@ -170,6 +170,14 @@ target_link_libraries(native-client PRIVATE
     nlohmann_json::nlohmann_json
 )
 
+if(CUDAToolkit_FOUND)                                                              
+    message(STATUS "🟢 Enabling CUDA Decoder for client...")   
+    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp)    
+    target_include_directories(native-client PRIVATE ${CUDAToolkit_INCLUDE_DIRS})  
+    target_compile_definitions(native-client PRIVATE HAVE_CUDA)
+    target_link_libraries(native-client PRIVATE CUDA::cudart)
+endif()    
+
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(native-client PRIVATE ${FFMPEG_LIBRARIES})
 endif()
