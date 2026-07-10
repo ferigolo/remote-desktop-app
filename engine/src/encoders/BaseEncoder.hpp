@@ -22,7 +22,7 @@ class BaseEncoder {
   const AVCodec* codec{};
   AVCodecContext* codecCtx{};
 
-  virtual void processPacket(const AVFrame* frame) = 0;
+  virtual void processPacket(const AVFrame* frame);
   virtual void flush() = 0;
   virtual void cleanup() = 0;
 
@@ -62,6 +62,23 @@ class BaseEncoder {
 
   bool IsInitialized() { return isInitialized; }
 };
+
+void BaseEncoder::processPacket(const AVFrame* frame) {
+  avcodec_send_frame(codecCtx, frame);
+
+  AVPacket* pkt = av_packet_alloc();
+  while (int ret = avcodec_receive_packet(codecCtx, pkt) >= 0) {
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+      break;
+    else if (ret < 0) {
+      printAvErrorAndReturn(ret, "Failed to process packet");
+      break;
+    }
+    if (onEncodedPacketCallback) onEncodedPacketCallback(pkt);
+    av_packet_unref(pkt);
+  }
+  av_packet_free(&pkt);
+}
 
 constexpr uint32_t getDrmFormatFromSpa(uint32_t spaFormat) {
   // Assuming these SPA constants are defined or include

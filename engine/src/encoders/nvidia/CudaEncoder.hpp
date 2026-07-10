@@ -25,7 +25,7 @@ class CudaEncoder : public BaseEncoder {
               uint32_t spaFormat) override;
   void encode(int fd, int width, int height, int stride,
               uint32_t spaFormat) override;
-  void processPacket(const AVFrame* frame) override;
+
   void flush() override;
   void cleanup() override;
 };

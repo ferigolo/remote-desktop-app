@@ -23,17 +23,6 @@ CudaEncoder::~CudaEncoder() {
   if (nv12CpuFrame) av_frame_free(&nv12CpuFrame);
 }
 
-void CudaEncoder::processPacket(const AVFrame* frame) {
-  avcodec_send_frame(codecCtx, frame);
-
-  AVPacket* pkt = av_packet_alloc();
-  while (avcodec_receive_packet(codecCtx, pkt) >= 0) {
-    if (onEncodedPacketCallback) onEncodedPacketCallback(pkt);
-    av_packet_unref(pkt);
-  }
-  av_packet_free(&pkt);
-}
-
 bool CudaEncoder::initialize(int width, int height, int fps, int bitrate) {
   if (av_hwdevice_ctx_create(&deviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr,
                              nullptr, 0) < 0)

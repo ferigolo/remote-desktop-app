@@ -14,6 +14,7 @@ class IntelIrisEncoder : public BaseEncoder {
 
   bool initialize(int width, int height, int fps = 60,
                   int bitrate = 50000000) override;
+
   void encode(int fd, int width, int height, int stride, uint64_t modifier,
               uint32_t spaFormat) override;
   void encode(int fd, int width, int height, int stride,
@@ -24,7 +25,8 @@ class IntelIrisEncoder : public BaseEncoder {
   AVBufferRef* hwFramesRef{};
   AVHWFramesContext* framesCtx{};
 
-  void processPacket(const AVFrame* frame) override;
+  AVFrame* createDrmFrame(int fd, int width, int height, int stride,
+                          uint64_t modifier, uint32_t spaFormat);
 
   void flush() override;
   void cleanup() override;
