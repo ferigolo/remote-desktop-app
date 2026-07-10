@@ -82,16 +82,16 @@ void IntelIrisDecoder::decode(const uint8_t* data, size_t size) {
           av_log_set_level(AV_LOG_WARNING);  // Restore error logs
         }
 
-        // // Allocate a DRM PRIME frame
-        // AVFrame* drmFrame = av_frame_alloc();
-        // drmFrame->format = AV_PIX_FMT_DRM_PRIME;
+        // Allocate a DRM PRIME frame
+        AVFrame* drmFrame = av_frame_alloc();
+        drmFrame->format = AV_PIX_FMT_DRM_PRIME;
 
-        // if (av_hwframe_map(drmFrame, hwFrame, AV_HWFRAME_MAP_READ) == 0) {
-        //   AVDRMFrameDescriptor* desc = (AVDRMFrameDescriptor*)drmFrame->data[0];
-        //   // You now have the raw File Descriptor (FD) pointing to the VRAM!
-        //   int dma_buf_fd = desc->objects[0].fd;
-        //   int pitch = desc->layers[0].planes[0].pitch;
-        // }
+        if (av_hwframe_map(drmFrame, hwFrame, AV_HWFRAME_MAP_READ) == 0) {
+          AVDRMFrameDescriptor* desc = (AVDRMFrameDescriptor*)drmFrame->data[0];
+          // You now have the raw File Descriptor (FD) pointing to the VRAM!
+          int dma_buf_fd = desc->objects[0].fd;
+          int pitch = desc->layers[0].planes[0].pitch;
+        }
 
         if (int ret = av_hwframe_transfer_data(swFrame, hwFrame, 0) < 0) {
           printAvErrorAndReturn(ret, "Error transfering data from VRAM to RAM");

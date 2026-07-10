@@ -1,4 +1,4 @@
 {
-  "cmake.sourceDirectory": "/home/enzo-ferigolo/Área de trabalho/remote-desktop-app/engine",
+  "cmake.sourceDirectory": "/home/efh/projects/remote-desktop-app/engine",
   "python-envs.defaultEnvManager": "ms-python.python:system"
 }

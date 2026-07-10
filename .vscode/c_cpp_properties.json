@@ -9,8 +9,7 @@
                 "/usr/include/x86_64-linux-gnu/qt6/QtCore",
                 "/usr/include/spa-0.2",
                 "/usr/include/pipewire-0.3",
-                "${workspaceFolder}/engine/src/encoders",
-                "${workspaceFolder}/engine/src/encoders"
+                "${workspaceFolder}/engine/src/encoders", "${workspaceFolder}/engine/src/client"
             ],
             "defines": [],
             "compilerPath": "/usr/bin/gcc-16",

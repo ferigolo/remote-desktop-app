@@ -6,12 +6,12 @@ set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED True)
 set(CMAKE_POSITION_INDEPENDENT_CODE ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-set(CMAKE_TOOLCHAIN_FILE "/vcpkg/scripts/buildsystems/vcpkg.cmake" CACHE STRING "" FORCE)
 
 if(NOT CMAKE_BUILD_TYPE)
     set(CMAKE_BUILD_TYPE "Debug" CACHE STRING "Choose the type of build." FORCE)
 endif()
 include(FetchContent)
+find_package(PkgConfig REQUIRED)
 
 # Fetch and Compile SDL3
 set(SDL_TEST OFF CACHE BOOL "" FORCE) # Disable tests to save time
@@ -49,6 +49,7 @@ set(SOURCE_FILES
     src/CoreEngine.cpp
     src/configurers/CoreEngineConfigurer.cpp
     src/network/WebRtcManager.cpp
+    src/encoders/software/SoftwareEncoder.cpp
 )
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -64,7 +65,6 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     find_package(Qt6 COMPONENTS Core DBus REQUIRED)
     
     # Find FFmpeg and PipeWire installed on the system via apt
-    find_package(PkgConfig REQUIRED)
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
     pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter libswscale)
 
@@ -81,39 +81,42 @@ elseif(APPLE)
     find_library(COREMEDIA CoreMedia)
     find_library(FOUNDATION Foundation)
 endif()
-                 
+
+# --- HARDWARE ACCELERATION DETECTION ---
+find_package(CUDAToolkit QUIET) # Check for the CUDA SDK/Toolkit
+pkg_check_modules(LIBVA QUIET libva libva-drm libmfx) # Intel QSV / VAAPI Detection
+
+if(CUDAToolkit_FOUND)
+    message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
+    SOURCE_FILES(APPEND src/encoders/nvidia/CudaEncoder.cpp)
+    list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp) # Added to Client
+    add_compile_definitions(HAVE_CUDA)
+endif()
+
+if(LIBVA_FOUND)
+    message(STATUS "🔵 Intel QSV Toolkit found: Enabling QSV support...")
+    list(APPEND SOURCE_FILES src/encoders/intel/IntelIrisEncoder.cpp) # Added to Engine
+    list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/intel/IntelIrisDecoder.cpp)
+    add_compile_definitions(HAVE_INTEL_QSV)
+endif()
+
+if(NOT CUDAToolkit_FOUND AND NOT LIBVA_FOUND)
+    message(WARNING "\n⚠️ No hardware Toolkit found. No hardware acceleration will be used. Try installing the Toolkits for your system (Intel, CUDA, Apple Silicon)\nDefaulting to software encoding/decoding")
+    list(APPEND SOURCE_FILES src/encoders/software/SoftwareEncoder.cpp) # Added to Engine
+    list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/software/SoftwareDecoder.cpp)
+endif()
+
 # --- EXECUTABLE: CORE ENGINE ---
-add_executable(core-engine ${SOURCE_FILES})
+add_executable(core-engine ${SOURCE_FILES}
+    src/encoders/software/SoftwareEncoder.cpp)
 target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
 
 # Link libraries downloaded via Git (FetchContent)
 target_link_libraries(core-engine PRIVATE 
-    SDL3::SDL3 
+    SDL3::SDL3
     datachannel 
     nlohmann_json::nlohmann_json
 )
-
-# Check for the CUDA SDK/Toolkit
-find_package(CUDAToolkit QUIET)
-if(CUDAToolkit_FOUND)
-    message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
-    target_sources(core-engine PRIVATE src/encoders/nvidia/CudaEncoder.cpp)
-    target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-    target_compile_definitions(core-engine PRIVATE HAVE_CUDA)
-    # This properly links the CUDA runtime without hardcoding paths:
-    target_link_libraries(core-engine PRIVATE CUDA::cudart)
-else()
-    message(STATUS "⚪ CUDA Toolkit not found: Skipping CUDA configuration...")
-endif()
-
-# Intel QSV / VAAPI Detection                                   
-find_package(PkgConfig QUIET)                
-pkg_check_modules(LIBVA QUIET libva libva-drm)
-if(LIBVA_FOUND)
-    message(STATUS "🟢 Intel QSV Toolkit found: Enabling QSV support...")
-    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/IntelIrisDecoder.cpp)         
-    add_compile_definitions(HAVE_INTEL_QSV)                                           
-endif()
 
 # Link system libraries
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
@@ -134,7 +137,8 @@ elseif(APPLE)
         message(STATUS "x86 Architecture detected. Falling back to Software Decoder.")
     endif()
 
-    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/AppleDecoder.cpp)             
+    list(APPEND SOURCE_FILES src/encoders/AppleEncoder.cpp)
+    list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/AppleDecoder.cpp)
     add_compile_definitions(HAVE_APPLE_VT)
 
     target_link_libraries(core-engine PRIVATE 
@@ -154,6 +158,7 @@ set(CLIENT_SOURCE_FILES
     src/client/network/ClientWebRtcManager.cpp
     src/client/decoders/software/SoftwareDecoder.cpp
     src/client/decoders/DecoderFactory.cpp 
+    ${EXTRA_CLIENT_SOURCE_FILES}
 )
 
 add_executable(native-client ${CLIENT_SOURCE_FILES})
@@ -167,4 +172,25 @@ target_link_libraries(native-client PRIVATE
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(native-client PRIVATE ${FFMPEG_LIBRARIES})
+endif()
+
+# --- LINK HARDWARE ACCELERATION LIBRARIES TO BOTH TARGETS ---
+if(CUDAToolkit_FOUND)
+    # Core Engine Links
+    target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_link_libraries(core-engine PRIVATE CUDA::cudart)
+    
+    # Native Client Links
+    target_include_directories(native-client PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
+    target_link_libraries(native-client PRIVATE CUDA::cudart)
+endif()
+
+if(LIBVA_FOUND)
+    # Core Engine Links
+    target_include_directories(core-engine PRIVATE ${LIBVA_INCLUDE_DIRS})
+    target_link_libraries(core-engine PRIVATE ${LIBVA_LIBRARIES})
+    
+    # Native Client Links
+    target_include_directories(native-client PRIVATE ${LIBVA_INCLUDE_DIRS})
+    target_link_libraries(native-client PRIVATE ${LIBVA_LIBRARIES})
 endif()

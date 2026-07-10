@@ -69,7 +69,7 @@ void ClientWebRtcManager::initializePeerConnection() {
         rtc::NalUnit::Separator::StartSequence);
     track->setMediaHandler(depacketizer);
 
-    track->onFrame([this](rtc::binary bin, rtc::FrameInfo frame) {
+    track->onFrame([this](rtc::binary bin, rtc::FrameInfo /*frame*/) {
       static int pktCount = 0;
       if (pktCount++ % 60 == 0) {
         std::println(

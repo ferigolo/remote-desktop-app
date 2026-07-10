@@ -2,7 +2,7 @@
 // Setup: initializes a hardware context and transfer the decoded frames from
 // the GPU back to the CPU before rendering
 
-#include "BaseDecoder.hpp"
+#include "../BaseDecoder.hpp"
 
 extern "C" {
 #include <libavutil/hwcontext.h>  // REQUIRED FOR HW DECODING

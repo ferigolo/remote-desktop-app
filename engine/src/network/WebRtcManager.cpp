@@ -83,7 +83,7 @@ void WebRtcManager::initializeVideoTrack() {
   videoTrack = pc->addTrack(videoMedia);
 
   this->rtpConfig = std::make_shared<rtc::RtpPacketizationConfig>(
-      ssrc, cname, payloadType, rtc::H264RtpPacketizer::defaultClockRate);
+      ssrc, cname, payloadType, rtc::H264RtpPacketizer::ClockRate);
 
   // 2. Avisamos a biblioteca que a NVIDIA usa StartSequence (00 00 00 01) e
   // fatiamos os frames
@@ -104,10 +104,11 @@ void WebRtcManager::setVideoFps(uint32_t fps) {
 }
 
 void WebRtcManager::sendVideoPacket(const uint8_t* data, size_t size) {
-  if (!(videoTrack && videoTrack->isOpen()))
-    // std::println("⏳ [WebRtcManager] videoTrack not open yet, dropping
-    // packet...");
+  if (!(videoTrack && videoTrack->isOpen())) {
+    std::println(
+        "⏳ [WebRtcManager] videoTrack not open yet, dropping packet...");
     return;
+  }
 
   if (this->rtpConfig) this->rtpConfig->timestamp += (90000 / this->videoFps);
 

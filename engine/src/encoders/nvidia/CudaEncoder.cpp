@@ -20,9 +20,7 @@ CudaEncoder::~CudaEncoder() {
     sws_freeContext(swsCtx);
     swsCtx = nullptr;
   }
-  if (nv12CpuFrame) {
-    av_frame_free(&nv12CpuFrame);
-  }
+  if (nv12CpuFrame) av_frame_free(&nv12CpuFrame);
 }
 
 void CudaEncoder::processPacket(const AVFrame* frame) {
@@ -37,9 +35,9 @@ void CudaEncoder::processPacket(const AVFrame* frame) {
 }
 
 bool CudaEncoder::initialize(int width, int height, int fps, int bitrate) {
-  if (av_hwdevice_ctx_create(&deviceCtx, AV_HWDEVICE_TYPE_CUDA,
-                                       nullptr, nullptr, 0) < 0)
-    return printAVErrorAndReturn("Failed to create CUDA device context");
+  if (av_hwdevice_ctx_create(&deviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr,
+                             nullptr, 0) < 0)
+    return printAvErrorAndReturn("Failed to create CUDA device context");
 
   const AVCodec* codec = avcodec_find_encoder_by_name("h264_nvenc");
   codecCtx = avcodec_alloc_context3(codec);
@@ -48,14 +46,16 @@ bool CudaEncoder::initialize(int width, int height, int fps, int bitrate) {
   codecCtx->time_base = {1, fps};
   codecCtx->framerate = {fps, 1};
   codecCtx->pix_fmt = AV_PIX_FMT_CUDA;
-  
+
   // WebRTC specific configuration for Low Latency and avoiding UDP drop
-  codecCtx->bit_rate = 5000000;      // 5 Mbps (50 Mbps was too high and caused UDP drops)
-  codecCtx->max_b_frames = 0;        // WebRTC hates B-frames (causes "missing during reorder" error)
-  codecCtx->gop_size = fps * 2;      // Keyframe every 2 seconds
-  
+  codecCtx->bit_rate =
+      5000000;  // 5 Mbps (50 Mbps was too high and caused UDP drops)
+  codecCtx->max_b_frames =
+      0;  // WebRTC hates B-frames (causes "missing during reorder" error)
+  codecCtx->gop_size = fps * 2;  // Keyframe every 2 seconds
+
   // NVENC specific optimizations for Ultra Low Latency
-  av_opt_set(codecCtx->priv_data, "preset", "p1", 0); 
+  av_opt_set(codecCtx->priv_data, "preset", "p1", 0);
   av_opt_set(codecCtx->priv_data, "tune", "ull", 0);
   av_opt_set(codecCtx->priv_data, "delay", "0", 0);
 
@@ -85,7 +85,7 @@ AVFrame* CudaEncoder::createDrmFrame(int fd, int width, int height, int stride,
   // RAM. Instead, it should look at the DMA-BUF
   // which points to where the image is stored at
   // VRAM (for that, it uses the file descriptor)
-  // drmFrame now only holds a desc that holds: 
+  // drmFrame now only holds a desc that holds:
   // - the Pipewire File descriptor (points to VRAM image address)
   // - the resolution
   // - the DRM format
@@ -96,7 +96,7 @@ AVFrame* CudaEncoder::createDrmFrame(int fd, int width, int height, int stride,
   auto& obj = desc->objects[0];
   obj.fd = fd;
   obj.size = height * stride;
-  obj.format_modifier = modifier; // How the GPU organized the pixels fisicly
+  obj.format_modifier = modifier;  // How the GPU organized the pixels fisicly
 
   desc->nb_layers = 1;
   auto& layer = desc->layers[0];
@@ -125,7 +125,7 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
 
   // Maps the DMA Buffer straight into NVENC
   if (av_hwframe_map(cudaFrame, drmFrame, AV_HWFRAME_MAP_READ) < 0) {
-    printAVErrorAndReturn("Failed to map DRM frame to CUDA");
+    printAvErrorAndReturn("Failed to map DRM frame to CUDA");
     av_frame_free(&drmFrame);
     av_frame_free(&cudaFrame);
     return;
@@ -148,13 +148,15 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
   }
 
   AVPixelFormat srcFmt = AV_PIX_FMT_BGRA;
-  if (spaFormat == 5) srcFmt = AV_PIX_FMT_RGBA; // SPA_VIDEO_FORMAT_RGBx
-  else if (spaFormat == 9) srcFmt = AV_PIX_FMT_BGRA; // SPA_VIDEO_FORMAT_BGRx
+  if (spaFormat == 5)
+    srcFmt = AV_PIX_FMT_RGBA;  // SPA_VIDEO_FORMAT_RGBx
+  else if (spaFormat == 9)
+    srcFmt = AV_PIX_FMT_BGRA;  // SPA_VIDEO_FORMAT_BGRx
 
   if (!swsCtx) {
-    swsCtx = sws_getContext(width, height, srcFmt,
-                            width, height, AV_PIX_FMT_NV12,
-                            SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
+    swsCtx =
+        sws_getContext(width, height, srcFmt, width, height, AV_PIX_FMT_NV12,
+                       SWS_FAST_BILINEAR, nullptr, nullptr, nullptr);
     nv12CpuFrame = av_frame_alloc();
     nv12CpuFrame->width = width;
     nv12CpuFrame->height = height;
@@ -162,11 +164,11 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
     av_frame_get_buffer(nv12CpuFrame, 32);
   }
 
-  const uint8_t* inData[1] = { (const uint8_t*)data };
-  int inLinesize[1] = { stride };
+  const uint8_t* inData[1] = {(const uint8_t*)data};
+  int inLinesize[1] = {stride};
 
-  sws_scale(swsCtx, inData, inLinesize, 0, height,
-            nv12CpuFrame->data, nv12CpuFrame->linesize);
+  sws_scale(swsCtx, inData, inLinesize, 0, height, nv12CpuFrame->data,
+            nv12CpuFrame->linesize);
 
   AVFrame* hwFrame = av_frame_alloc();
   if (av_hwframe_get_buffer(codecCtx->hw_frames_ctx, hwFrame, 0) < 0) {
@@ -174,7 +176,8 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
     av_frame_free(&hwFrame);
   } else {
     if (av_hwframe_transfer_data(hwFrame, nv12CpuFrame, 0) < 0) {
-      std::println(stderr, "❌ [CudaEncoder] Failed to upload NV12 frame to CUDA");
+      std::println(stderr,
+                   "❌ [CudaEncoder] Failed to upload NV12 frame to CUDA");
     } else {
       processPacket(hwFrame);
     }
