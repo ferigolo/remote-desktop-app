@@ -1,9 +1,10 @@
 #pragma once
+#include <mutex>
 
+extern "C" {
 #include <SDL3/SDL_render.h>
 #include <libavutil/frame.h>
-
-#include <mutex>
+}
 
 #ifdef HAVE_CUDA
 #include <GL/gl.h>

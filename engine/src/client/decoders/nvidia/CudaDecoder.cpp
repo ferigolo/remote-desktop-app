@@ -11,7 +11,7 @@ CudaDecoder::~CudaDecoder() {
 }
 
 // Static callback to force FFmpeg to output CUDA memory frames
-AVPixelFormat CudaDecoder::getHwFormat(AVCodecContext* ctx,
+AVPixelFormat CudaDecoder::getHwFormat(AVCodecContext* /*ctx*/,
                                        const AVPixelFormat* pixFmts) {
   for (const AVPixelFormat* p = pixFmts; *p != -1; p++)
     if (*p == AV_PIX_FMT_CUDA) return *p;
@@ -32,7 +32,8 @@ bool CudaDecoder::initialize() {
 
   // Create the CUDA hardware device context
   if (int ret = av_hwdevice_ctx_create(&hwDeviceCtx, AV_HWDEVICE_TYPE_CUDA, "0",
-                                       nullptr, 0) < 0)
+                                       nullptr, 0);
+      ret < 0)
     return printAvErrorAndReturn(
         ret, "Failed to create CUDA hardware device context");
 
@@ -44,7 +45,7 @@ bool CudaDecoder::initialize() {
   codecCtx->thread_count = 4;
   codecCtx->thread_type = FF_THREAD_SLICE;
 
-  if (int ret = avcodec_open2(codecCtx, codec, nullptr) < 0)
+  if (int ret = avcodec_open2(codecCtx, codec, nullptr); ret < 0)
     return printAvErrorAndReturn(ret, "Failed to open H264 CUDA decoder");
 
   frame = av_frame_alloc();
@@ -63,42 +64,42 @@ void CudaDecoder::decode(const uint8_t* data, size_t size) {
   pkt->data = (uint8_t*)data;
   pkt->size = size;
 
-  if (int ret = avcodec_send_packet(codecCtx, pkt) < 0)
-    if (hasDecodedFirstFrame)
+  if (int ret = avcodec_send_packet(codecCtx, pkt); ret < 0) {
+    if (hasDecodedFirstFrame)  // ensures it doesn't spam the console with
+                               // expected errors until a valid stream is
+                               // established
       printAvErrorAndReturn(ret, "Failed sending packet into CUDA decoder");
-    else
-      while (true) {
-        int ret = avcodec_receive_frame(codecCtx, frame);
-        if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
-          break;
-        else if (ret < 0) {
-          if (hasDecodedFirstFrame)
-            printAvErrorAndReturn(ret,
-                                  "Failed to receive decoded "
-                                  "frame from codec");
-          break;
-        }
-        
-        if (!hasDecodedFirstFrame) {
-          hasDecodedFirstFrame = true;
-          av_log_set_level(AV_LOG_WARNING);
-        }
-
-        static int frameCount = 0;
-        if (frameCount++ % 60 == 0)
-          std::println("✅ [Decoder] HW Decoded frame #{} ({}x{}) - Format: {}",
-                       frameCount, frame->width, frame->height,
-                       av_get_pix_fmt_name((AVPixelFormat)frame->format));
-
-        // IMPORTANT: The pointers below are CUDA device pointers (VRAM), not
-        // host RAM pointers!
-        // They are typically in NV12 format
-        // (yPlane = frame->data[0], uvPlane = frame->data[1])
-
-        if (onFrameDecoded)
-          onFrameDecoded(frame->data[0], frame->linesize[0], frame->data[1],
-                         frame->linesize[1], frame->width, frame->height);
+  } else
+    while (true) {
+      int ret = avcodec_receive_frame(codecCtx, frame);
+      if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+        break;
+      else if (ret < 0) {
+        if (hasDecodedFirstFrame)
+          printAvErrorAndReturn(ret,
+                                "Failed to receive decoded "
+                                "frame from codec");
+        break;
       }
 
+      if (!hasDecodedFirstFrame) {
+        hasDecodedFirstFrame = true;
+        av_log_set_level(AV_LOG_WARNING);
+      }
+
+      static int frameCount = 0;
+      if (frameCount++ % 60 == 0)
+        std::println("✅ [Decoder] HW Decoded frame #{} ({}x{}) - Format: {}",
+                     frameCount, frame->width, frame->height,
+                     av_get_pix_fmt_name((AVPixelFormat)frame->format));
+
+      if (onFrameDecoded) onFrameDecoded(frame);
+    }
+
   av_packet_free(&pkt);
+}
+
+void CudaDecoder::updateTexture(SDL_Renderer* renderer, SDL_Texture** texture) {
+  (void)renderer;
+  (void)texture;
 }

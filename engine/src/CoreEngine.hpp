@@ -7,6 +7,10 @@
 #include "encoders/BaseEncoder.hpp"
 #include "network/WebRtcManager.hpp"
 
+extern "C" {
+#include <SDL3/SDL.h>
+}
+
 class CoreEngine {
  public:
   CoreEngine();

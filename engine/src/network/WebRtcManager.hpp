@@ -3,6 +3,8 @@
 #include <memory>
 #include <string>
 #include <print>
+#include <mutex>
+#include <condition_variable>
 
 enum class SignalingMessageType
 {
@@ -23,6 +25,11 @@ private:
   std::shared_ptr<rtc::Track> videoTrack;
   std::shared_ptr<rtc::RtpPacketizationConfig> rtpConfig;
   uint32_t videoFps = 60;
+
+  std::mutex trackMutex;
+  std::condition_variable trackCv;
+  bool isVideoTrackOpen = false;
+  bool stopWaiting = false;
 
   constexpr SignalingMessageType
   parseMessageType(const std::string &typeStr);

@@ -17,14 +17,14 @@
 #endif
 
 std::unique_ptr<BaseDecoder> createOptimalDecoder() {
-#ifdef HAVE_APPLE_VT
-  // On Mac, VideoToolbox is almost always the right choice
-  return std::make_unique<AppleDecoder>();
-#endif
 #ifdef HAVE_NVIDIA
   if (avcodec_find_decoder_by_name("h264_cuvid")) {
     return std::make_unique<NvidiaDecoder>();
   }
+#ifdef HAVE_APPLE_VT
+  // On Mac, VideoToolbox is almost always the right choice
+  return std::make_unique<AppleDecoder>();
+#endif
 #endif
 #ifdef HAVE_INTEL_QSV
   if (avcodec_find_decoder_by_name("h264_qsv")) {

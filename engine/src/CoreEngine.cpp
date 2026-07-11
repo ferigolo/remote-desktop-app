@@ -1,7 +1,5 @@
 #include "CoreEngine.hpp"
 
-#include <SDL3/SDL.h>
-
 #include <cmath>
 #include <print>
 #include <string_view>
@@ -87,8 +85,6 @@ void CoreEngine::printRendererInfo() const {
 
   const char* backendName = SDL_GetRendererName(renderer);
   std::println(" [Core] Using {} backend", backendName);
-
-  // Delegando o trabalho sujo e OS-specific para as Utils
   PlatformUtils::printGPUName(renderer, backendName);
 #endif
 }

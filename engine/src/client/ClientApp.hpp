@@ -1,10 +1,14 @@
 #pragma once
-#include <SDL3/SDL.h>
 
 #include <memory>
 #include <string>
-#include "decoders/BaseDecoder.hpp"
+
 #include "Renderer.hpp"
+#include "decoders/BaseDecoder.hpp"
+
+extern "C" {
+#include <SDL3/SDL.h>
+}
 
 class ClientWebRtcManager;
 

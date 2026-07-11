@@ -46,13 +46,10 @@ void ClientApp::run() {
   SDL_Event event;
 
   while (isRunning) {
-    while (SDL_PollEvent(&event)) {
+    while (SDL_PollEvent(&event))
       if (event.type == SDL_EVENT_QUIT) isRunning = false;
-    }
 
-    if (renderer) {
-      renderer->renderFrame();
-    }
+    if (renderer) renderer->renderFrame();
 
     SDL_Delay(5);  // Keep CPU usage low in main thread
   }

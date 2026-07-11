@@ -7,9 +7,9 @@ class CudaDecoder : public BaseDecoder {
   bool initialize() override;
 
   void decode(const uint8_t* data, size_t size) override;
+  void updateTexture(SDL_Renderer* renderer, SDL_Texture** texture) override;
 
  private:
-  AVPacket* packet{};
   AVFrame* frame{};
   AVBufferRef* hwDeviceCtx{};
 

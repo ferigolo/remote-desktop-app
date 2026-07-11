@@ -87,14 +87,10 @@ void PipeWireClient::negotiateFormat(uint32_t node_id) {
       &b, SPA_TYPE_OBJECT_Format, SPA_PARAM_EnumFormat, SPA_FORMAT_mediaType,
       SPA_POD_Id(SPA_MEDIA_TYPE_video), SPA_FORMAT_mediaSubtype,
       SPA_POD_Id(SPA_MEDIA_SUBTYPE_raw), SPA_FORMAT_VIDEO_format,
-      // Wish list of video formats (Wayland delivers RGBA natively)
       SPA_POD_CHOICE_ENUM_Id(4, SPA_VIDEO_FORMAT_RGBx, SPA_VIDEO_FORMAT_RGBx,
                              SPA_VIDEO_FORMAT_RGBA, SPA_VIDEO_FORMAT_BGRx));
 
   // Connecting to the stream.
-  // We REMOVED PW_STREAM_FLAG_MAP_BUFFERS because mapping DMA-BUFs to CPU
-  // memory fails in PipeWire and we only want zero-copy hardware encoding
-  // anyway.
   pw_stream_connect(stream, PW_DIRECTION_INPUT, node_id,
                     (enum pw_stream_flags)(PW_STREAM_FLAG_AUTOCONNECT), params,
                     1);
@@ -135,16 +131,24 @@ void PipeWireClient::onCoreError(void* /*data*/, uint32_t id, int /*seq*/,
 void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
                                           pw_stream_state state,
                                           const char* error) {
-  static const char* state_names[] = {"ERROR", "UNCONNECTED", "CONNECTING",
-                                      "PAUSED", "STREAMING"};
+  constexpr auto state_name = [](pw_stream_state s) {
+    switch (s) {
+      case PW_STREAM_STATE_ERROR: return "ERROR";
+      case PW_STREAM_STATE_UNCONNECTED: return "UNCONNECTED";
+      case PW_STREAM_STATE_CONNECTING: return "CONNECTING";
+      case PW_STREAM_STATE_PAUSED: return "PAUSED";
+      case PW_STREAM_STATE_STREAMING: return "STREAMING";
+      default: return "UNKNOWN";
+    }
+  };
   std::println("🌊 [PipeWire] Stream state changed: {} -> {}",
-               state_names[old_state], state_names[state]);
+               state_name(old_state), state_name(state));
 
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
 
   if (state == PW_STREAM_STATE_PAUSED)
     pw_stream_set_active(self->stream, true);
-  else if (state == PW_STREAM_STATE_ERROR && self->context != nullptr)
+  if (state == PW_STREAM_STATE_ERROR && self->context != nullptr)
     std::println(stderr, "❌ [PipeWire] Error at Stream: {}",
                  error ? error : "Unknown");
 }
@@ -155,6 +159,7 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
 void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                                           const spa_pod* param) {
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
+  std::println("🔍 [PipeWireClient] onStreamParamChanged called with id: {}, param is null: {}", id, param == nullptr);
 
   if (param == nullptr || id != SPA_PARAM_Format) return;
 
@@ -172,10 +177,11 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                   ? info.framerate.num / info.framerate.denom
                   : 144;
   self->drmModifier = info.modifier;
+  std::println("🔍 [PipeWireClient] Negotiated format: {}x{} at {}fps, modifier: {}", self->width, self->height, self->fps, self->drmModifier);
 
   uint8_t buffer[1024];
   spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
-  const struct spa_pod* params[1];
+  const struct spa_pod* params[4];
 
   params[0] = (spa_pod*)spa_pod_builder_add_object(
       &b, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
@@ -183,7 +189,8 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
       SPA_PARAM_BUFFERS_blocks, SPA_POD_Int(1), SPA_PARAM_BUFFERS_size,
       SPA_POD_Int(self->width * self->height * 4), SPA_PARAM_BUFFERS_stride,
       SPA_POD_Int(self->width * 4), SPA_PARAM_BUFFERS_dataType,
-      SPA_POD_CHOICE_FLAGS_Int((1 << SPA_DATA_DmaBuf) | (1 << SPA_DATA_MemFd)));
+      SPA_POD_CHOICE_FLAGS_Int((1 << SPA_DATA_DmaBuf) | (1 << SPA_DATA_MemFd) |
+                               (1 << SPA_DATA_MemPtr)));
 
   pw_stream_update_params(self->stream, params, 1);
   pw_stream_set_active(self->stream, true);
@@ -215,25 +222,39 @@ void PipeWireClient::onStreamProcess(void* data) {
     case SPA_DATA_DmaBuf:
     case SPA_ID_INVALID:
       frame.type = FrameMemoryType::DmaBuf;
-      static int frameCount = 0;
-      frameCount++;
-      if (frameCount % frame.fps == 0)
-        std::println(
-            "📸 [PipeWireClient] Captured and sent {} frames (GPU DmaBuf) to "
-            "BaseEncoder...",
-            frameCount);
       break;
     case SPA_DATA_MemFd:
-      static int frameCountMemFd = 0;
-      frameCountMemFd++;
-      if (frameCountMemFd % frame.fps == 0)
-        std::println(
-            "📸 [PipeWireClient] Captured and sent {} frames (MemFd) to "
-            "BaseEncoder...",
-            frameCountMemFd);
+      frame.type = FrameMemoryType::MemFd;
+      break;
+    case SPA_DATA_MemPtr:
+      frame.type = FrameMemoryType::MemPtr;
+      frame.data = (uint8_t*)buf->datas[0].data;
+      frame.size = buf->datas[0].chunk->size;
       break;
     default:
+      std::println("⚠️ [PipeWireClient] Unknown frame memory type: {}", buf->datas[0].type);
+      frame.type = FrameMemoryType::MemFd; // fallback
       break;
+  }
+
+  if (frame.type == FrameMemoryType::DmaBuf) {
+    static int frameCount = 0;
+    frameCount++;
+    if (frameCount == 1 || frameCount % frame.fps == 0) {
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured DmaBuf frame and sending to BaseEncoder...", frameCount);
+    }
+  } else if (frame.type == FrameMemoryType::MemFd) {
+    static int frameCountMemFd = 0;
+    frameCountMemFd++;
+    if (frameCountMemFd == 1 || frameCountMemFd % frame.fps == 0) {
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemFd frame and sending to BaseEncoder...", frameCountMemFd);
+    }
+  } else if (frame.type == FrameMemoryType::MemPtr) {
+    static int frameCountMemPtr = 0;
+    frameCountMemPtr++;
+    if (frameCountMemPtr == 1 || frameCountMemPtr % frame.fps == 0) {
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemPtr frame and sending to BaseEncoder...", frameCountMemPtr);
+    }
   }
 
   if (self->onFrameCallback) self->onFrameCallback(frame);

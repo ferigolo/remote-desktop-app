@@ -88,7 +88,7 @@ pkg_check_modules(LIBVA QUIET libva libva-drm libmfx) # Intel QSV / VAAPI Detect
 
 if(CUDAToolkit_FOUND)
     message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
-    SOURCE_FILES(APPEND src/encoders/nvidia/CudaEncoder.cpp)
+    list(APPEND SOURCE_FILES src/encoders/nvidia/CudaEncoder.cpp)
     list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp) # Added to Client
     add_compile_definitions(HAVE_CUDA)
 endif()
@@ -155,6 +155,7 @@ install(TARGETS core-engine DESTINATION bin)
 set(CLIENT_SOURCE_FILES
     src/client/main.cpp
     src/client/ClientApp.cpp
+    src/client/Renderer.cpp
     src/client/network/ClientWebRtcManager.cpp
     src/client/decoders/software/SoftwareDecoder.cpp
     src/client/decoders/DecoderFactory.cpp 
