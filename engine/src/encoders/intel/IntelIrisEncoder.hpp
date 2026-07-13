@@ -24,8 +24,8 @@ class IntelIrisEncoder : public BaseEncoder {
   AVBufferRef* hwFramesRef{};
   AVHWFramesContext* framesCtx{};
 
-  void processPacket(const AVFrame* frame) override;
-
-  void flush() override;
+  AVFrame* createDrmFrame(int fd, int width, int height, int stride,
+                          uint64_t modifier, uint32_t spaFormat);
+                          
   void cleanup() override;
 };

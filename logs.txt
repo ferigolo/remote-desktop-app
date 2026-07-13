@@ -1,0 +1,749 @@
+ Starting standalone CoreEngine...
+🚀 [Core] Starting Headless Remote Desktop Host...
+🌐 [WebRtcManager] Connecting to ws://0.0.0.0:8080...
+2026-07-13 14:24:34.011 INFO  [343981] [rtc::impl::TcpTransport::processConnect@463] TCP connected
+🐧 [LinuxCapturer] Instantiated. Preparing XDG Portal and PipeWire...
+🐧 [LinuxCapturer] Starting Wayland capture process...
+🐧 [ScreencastPortal] Requesting CreateSession...
+2026-07-13 14:24:34.012 INFO  [343981] [rtc::impl::WsTransport::incoming@128] WebSocket client-side open
+🌐 [WebRtcManager] Connected to Signaling Server!
+🐧 [ScreencastPortal] "CreateSession" request path: "/org/freedesktop/portal/desktop/request/1_174/remotedesktop_req_8ad7e8dfa4d1481ba267a724fb9b34ec"
+✅ Session created at: "/org/freedesktop/portal/desktop/session/1_174/remotedesktop_ses_cbae55b3e23942449743a007958982dd"
+🐧 [ScreencastPortal] Requesting SelectSources...
+🐧 [ScreencastPortal] "SelectSources" request path: "/org/freedesktop/portal/desktop/request/1_174/t"
+✅ SelectSources successful.
+🐧 [ScreencastPortal] Requesting Start (Waiting for user input)...
+🐧 [ScreencastPortal] "Start" request path: "/org/freedesktop/portal/desktop/request/1_174/t"
+🐧 [ScreencastPortal] lastResults keys: QList("streams")
+🐧 [ScreencastPortal] streamsVar typeName: QDBusArgument isNull: false
+🐧 [ScreencastPortal] streamsVar can convert to QDBusArgument
+🎉 [ScreencastPortal] User accepted screen share. Node ID: 80
+🐧 [ScreencastPortal] Requesting PipeWire File Descriptor...
+🔑 [ScreencastPortal] Success! Received PipeWire File Descriptor: 9
+[D] pw.context [pipewire.c:231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.log'
+[D] pw.context [pipewire.c:129 open_plugin()] loaded plugin:'/usr/lib/x86_64-linux-gnu/spa-0.2/support/libspa-support.so'
+[D][09171.854831] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-journal' factory-name:'support.log'
+[D][09171.855016] pw.context   | [      pipewire.c:  129 open_plugin()] loaded plugin:'/usr/lib/x86_64-linux-gnu/spa-0.2/support/libspa-journal.so'
+[D][09171.855054] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.cpu'
+[D][09171.855149] spa.cpu      | [           cpu.c:  255 impl_init()] 0x60d83867c808: count:8 align:64 flags:000fcbdb
+[I][09171.855163] pw.context   | [      pipewire.c:  647 pw_init()] version 1.0.5
+[PipeWireClient] Library initialized
+[D][09171.855182] pw.thread-loop | [   thread-loop.c:  146 loop_new()] 0x60d83867c880: new name:pipewire-capture-loop
+[D][09171.855191] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.system'
+[D][09171.855202] spa.system   | [        system.c:  333 impl_init()] 0x60d83867ca08: initialized
+[D][09171.855210] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.loop'
+[D][09171.855244] spa.system   | [        system.c:   95 impl_pollfd_create()] 0x60d83867ca08: new fd:11
+[D][09171.855256] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d83867ca08: new fd:12
+[D][09171.855268] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d83867ca08: new fd:13
+[D][09171.855275] spa.loop     | [          loop.c: 1051 impl_init()] 0x60d83867ca98: initialized
+[D][09171.855287] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d83867ca08: new fd:14
+[D][09171.855303] pw.context   | [       context.c:  196 pw_context_new()] 0x60d838684ce0: new
+[I][09171.855356] pw.conf      | [          conf.c:  408 conf_load()] 0x60d838685200: loaded config '/usr/share/pipewire/client.conf' with 5 items
+[I][09171.855377] pw.conf      | [          conf.c:  972 pw_conf_section_for_each()] handle config '/usr/share/pipewire/client.conf' section 'context.properties'
+[I][09171.855386] pw.context   | [       context.c:  247 pw_context_new()] 0x60d838684ce0: parsed 1 context.properties items
+[D][09171.855409] pw.data-loop | [     data-loop.c:   98 loop_new()] 0x60d838686500: new
+[D][09171.855430] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.system'
+[D][09171.855439] spa.system   | [        system.c:  333 impl_init()] 0x60d8386865f8: initialized
+[D][09171.855447] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-support' factory-name:'support.loop'
+[D][09171.855474] spa.system   | [        system.c:   95 impl_pollfd_create()] 0x60d8386865f8: new fd:15
+[D][09171.855485] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d8386865f8: new fd:16
+[D][09171.855493] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d8386865f8: new fd:17
+[D][09171.855501] spa.loop     | [          loop.c: 1051 impl_init()] 0x60d8386866a8: initialized
+[D][09171.855511] pw.mem       | [           mem.c:  143 pw_mempool_new()] 0x60d83868e860: new
+[D][09171.855520] pw.work-queue | [    work-queue.c:   88 pw_work_queue_new()] 0x60d838685fe0: new
+[D][09171.855530] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d83867ca08: new fd:18
+[D][09171.855542] pw.context   | [      pipewire.c:  231 load_spa_handle()] load lib:'support/libspa-dbus' factory-name:'support.dbus'
+[D][09171.855756] pw.context   | [      pipewire.c:  129 open_plugin()] loaded plugin:'/usr/lib/x86_64-linux-gnu/spa-0.2/support/libspa-dbus.so'
+[D][09171.855776] spa.dbus     | [          dbus.c:  521 impl_init()] 0x60d83868ee78: initialized
+[D][09171.856849] pw.core      | [     impl-core.c:  422 pw_context_create_core()] 0x60d83868f190: new pipewire-efh-343972
+[D][09171.856867] pw.global    | [        global.c:   90 pw_global_new()] 0x60d8386922c0: new PipeWire:Interface:Core 0
+[D][09171.856874] pw.global    | [        global.c:  166 pw_global_register()] 0x60d8386922c0: registered 0
+[I][09171.857060] pw.conf      | [          conf.c:  972 pw_conf_section_for_each()] handle config '/usr/share/pipewire/client.conf' section 'context.spa-libs'
+[D][09171.857082] pw.context   | [       context.c: 1597 pw_context_add_spa_lib()] 0x60d838684ce0: map factory regex 'audio.convert.*' to 'audioconvert/libspa-audioconvert
+[D][09171.857094] pw.context   | [       context.c: 1597 pw_context_add_spa_lib()] 0x60d838684ce0: map factory regex 'support.*' to 'support/libspa-support
+[I][09171.857102] pw.context   | [       context.c:  348 pw_context_new()] 0x60d838684ce0: parsed 2 context.spa-libs items
+[I][09171.857107] pw.conf      | [          conf.c:  972 pw_conf_section_for_each()] handle config '/usr/share/pipewire/client.conf' section 'context.modules'
+[I][09171.857113] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-protocol-native args:(null)
+[D][09171.857121] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.857133] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-protocol-native (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-protocol-native.so) args((null))
+[D][09171.857332] pw.global    | [        global.c:   90 pw_global_new()] 0x60d8386946f0: new PipeWire:Interface:Module 1
+[D][09171.857366] pw.protocol  | [      protocol.c:   52 pw_protocol_new()] 0x60d838694840: Created protocol PipeWire:Protocol:Native
+[D][09171.857373] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Core/4 to protocol PipeWire:Protocol:Native
+[D][09171.857381] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Registry/3 to protocol PipeWire:Protocol:Native
+[D][09171.857387] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Module/3 to protocol PipeWire:Protocol:Native
+[D][09171.857395] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Device/3 to protocol PipeWire:Protocol:Native
+[D][09171.857406] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Node/3 to protocol PipeWire:Protocol:Native
+[D][09171.857413] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Port/3 to protocol PipeWire:Protocol:Native
+[D][09171.857419] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Factory/3 to protocol PipeWire:Protocol:Native
+[D][09171.857427] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Client/3 to protocol PipeWire:Protocol:Native
+[D][09171.857435] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Link/3 to protocol PipeWire:Protocol:Native
+[D][09171.857443] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Core/0 to protocol PipeWire:Protocol:Native
+[D][09171.857451] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Registry/0 to protocol PipeWire:Protocol:Native
+[D][09171.857460] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Module/0 to protocol PipeWire:Protocol:Native
+[D][09171.857469] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Node/0 to protocol PipeWire:Protocol:Native
+[D][09171.857478] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Port/0 to protocol PipeWire:Protocol:Native
+[D][09171.857487] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Factory/0 to protocol PipeWire:Protocol:Native
+[D][09171.857497] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Client/0 to protocol PipeWire:Protocol:Native
+[D][09171.857507] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Link/0 to protocol PipeWire:Protocol:Native
+[D][09171.857516] mod.protocol-native | [module-protocol-: 1722 pipewire__module_init()] 0x60d838694840: new debug:0
+[D][09171.857528] mod.protocol-native | [module-protocol-: 1392 create_server()] 0x60d838694840: created server 0x60d838694c00
+[D][09171.857543] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d838694520: updated 3 properties
+[D][09171.857552] pw.global    | [        global.c:  166 pw_global_register()] 0x60d8386946f0: registered 1
+[D][09171.857561] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d838694520: loaded module: libpipewire-module-protocol-native
+[I][09171.857572] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-protocol-native
+[I][09171.857582] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-client-node args:(null)
+[D][09171.857592] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.857604] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-client-node (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-client-node.so) args((null))
+[D][09171.857876] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838695900: new PipeWire:Interface:Module 2
+[D][09171.857905] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d838695bb0: new client-node
+[D][09171.857918] mod.client-node | [module-client-no:  183 pipewire__module_init()] module 0x60d838695690: new
+[D][09171.857929] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:Node to context
+[D][09171.857949] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type Spa:Pointer:Interface:Node to context
+[D][09171.857960] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:ClientNode/5 to protocol PipeWire:Protocol:Native
+[D][09171.857970] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:ClientNode/0 to protocol PipeWire:Protocol:Native
+[D][09171.857980] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d838695690: updated 3 properties
+[D][09171.857989] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838695900: registered 2
+[D][09171.857998] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d838695bb0: updated 1 properties
+[D][09171.858010] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838696000: new PipeWire:Interface:Factory 3
+[D][09171.858021] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838696000: registered 3
+[D][09171.858030] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d838695690: loaded module: libpipewire-module-client-node
+[I][09171.858039] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-client-node
+[I][09171.858049] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-client-device args:(null)
+[D][09171.858059] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.858074] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-client-device (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-client-device.so) args((null))
+[D][09171.858167] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838696de0: new PipeWire:Interface:Module 4
+[D][09171.858186] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d8386970f0: new client-device
+[D][09171.858194] mod.client-device | [module-client-de:  194 pipewire__module_init()] module 0x60d838696b70: new
+[D][09171.858204] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type Spa:Pointer:Interface:Device to context
+[D][09171.858214] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal Spa:Pointer:Interface:Device/0 to protocol PipeWire:Protocol:Native
+[D][09171.858224] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d838696b70: updated 3 properties
+[D][09171.858233] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838696de0: registered 4
+[D][09171.858243] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d8386970f0: updated 1 properties
+[D][09171.858253] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838697500: new PipeWire:Interface:Factory 5
+[D][09171.858263] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838697500: registered 5
+[D][09171.858272] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d838696b70: loaded module: libpipewire-module-client-device
+[I][09171.858280] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-client-device
+[I][09171.858289] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-adapter args:(null)
+[D][09171.858298] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.858311] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-adapter (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-adapter.so) args((null))
+[D][09171.858453] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838698250: new PipeWire:Interface:Module 6
+[D][09171.858474] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d838698540: new adapter
+[D][09171.858482] mod.adapter  | [module-adapter.c:  365 pipewire__module_init()] module 0x60d838697fe0: new
+[D][09171.858489] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d838697fe0: updated 3 properties
+[D][09171.858496] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838698250: registered 6
+[D][09171.858503] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d838698540: updated 1 properties
+[D][09171.858511] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838698950: new PipeWire:Interface:Factory 7
+[D][09171.858519] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838698950: registered 7
+[D][09171.858527] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d838697fe0: loaded module: libpipewire-module-adapter
+[I][09171.858534] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-adapter
+[I][09171.858543] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-metadata args:(null)
+[D][09171.858551] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.858562] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-metadata (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-metadata.so) args((null))
+[D][09171.858636] pw.global    | [        global.c:   90 pw_global_new()] 0x60d838699b60: new PipeWire:Interface:Module 8
+[D][09171.858648] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Metadata/3 to protocol PipeWire:Protocol:Native
+[D][09171.858653] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Metadata/3 to protocol PipeWire:Protocol:Native
+[D][09171.858659] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d838699f00: new metadata
+[D][09171.858664] mod.metadata | [module-metadata.:  271 pipewire__module_init()] module 0x60d838699490: new
+[D][09171.858670] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:Metadata to context
+[D][09171.858675] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d838699490: updated 3 properties
+[D][09171.858681] pw.global    | [        global.c:  166 pw_global_register()] 0x60d838699b60: registered 8
+[D][09171.858686] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d838699f00: updated 1 properties
+[D][09171.858691] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869a300: new PipeWire:Interface:Factory 9
+[D][09171.858697] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869a300: registered 9
+[D][09171.858701] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d838699490: loaded module: libpipewire-module-metadata
+[I][09171.858706] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-metadata
+[I][09171.858712] pw.module    | [   impl-module.c:  157 pw_context_load_module()] 0x60d838684ce0: name:libpipewire-module-session-manager args:(null)
+[D][09171.858718] pw.module    | [   impl-module.c:  162 pw_context_load_module()] moduledir set to: /usr/lib/x86_64-linux-gnu/pipewire-0.3
+[D][09171.858724] pw.module    | [   impl-module.c:  172 pw_context_load_module()] trying to load module: libpipewire-module-session-manager (/usr/lib/x86_64-linux-gnu/pipewire-0.3/libpipewire-module-session-manager.so) args((null))
+[D][09171.858788] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869b080: new PipeWire:Interface:Module 10
+[D][09171.858799] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:ClientEndpoint/0 to protocol PipeWire:Protocol:Native
+[D][09171.858810] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:ClientSession/0 to protocol PipeWire:Protocol:Native
+[D][09171.858818] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:EndpointLink/0 to protocol PipeWire:Protocol:Native
+[D][09171.858825] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:EndpointStream/0 to protocol PipeWire:Protocol:Native
+[D][09171.858832] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Endpoint/0 to protocol PipeWire:Protocol:Native
+[D][09171.858837] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Session/0 to protocol PipeWire:Protocol:Native
+[D][09171.858842] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:EndpointLink/0 to protocol PipeWire:Protocol:Native
+[D][09171.858848] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:EndpointStream/0 to protocol PipeWire:Protocol:Native
+[D][09171.858853] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Endpoint/0 to protocol PipeWire:Protocol:Native
+[D][09171.858858] pw.protocol  | [      protocol.c:  136 pw_protocol_add_marshal()] 0x60d838694840: Add marshal PipeWire:Interface:Session/0 to protocol PipeWire:Protocol:Native
+[D][09171.858862] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869b520: new client-endpoint
+[D][09171.858867] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869b7c0: new client-session
+[D][09171.858872] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869ba60: new session
+[D][09171.858877] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:Session to context
+[D][09171.858882] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869bd20: new endpoint
+[D][09171.858887] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:Endpoint to context
+[D][09171.858893] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869bfe0: new endpoint-stream
+[D][09171.858899] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:EndpointStream to context
+[D][09171.858904] pw.factory   | [  impl-factory.c:   52 pw_context_create_factory()] 0x60d83869c2a0: new endpoint-link
+[D][09171.858909] pw.context   | [       context.c: 1651 pw_context_register_export_type()] context 0x60d838684ce0: Add export type PipeWire:Interface:EndpointLink to context
+[D][09171.858914] pw.module    | [   impl-module.c:  359 pw_impl_module_update_properties()] 0x60d83869ae10: updated 3 properties
+[D][09171.858919] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869b080: registered 10
+[D][09171.858924] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869b520: updated 1 properties
+[D][09171.858929] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869c620: new PipeWire:Interface:Factory 11
+[D][09171.858935] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869c620: registered 11
+[D][09171.858941] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869b7c0: updated 1 properties
+[D][09171.858945] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869cae0: new PipeWire:Interface:Factory 12
+[D][09171.858951] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869cae0: registered 12
+[D][09171.858960] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869ba60: updated 1 properties
+[D][09171.858966] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869cfa0: new PipeWire:Interface:Factory 13
+[D][09171.858972] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869cfa0: registered 13
+[D][09171.858977] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869bd20: updated 1 properties
+[D][09171.858981] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869d460: new PipeWire:Interface:Factory 14
+[D][09171.858987] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869d460: registered 14
+[D][09171.858992] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869bfe0: updated 1 properties
+[D][09171.858997] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869d920: new PipeWire:Interface:Factory 15
+[D][09171.859002] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869d920: registered 15
+[D][09171.859007] pw.factory   | [  impl-factory.c:  142 pw_impl_factory_update_properties()] 0x60d83869c2a0: updated 1 properties
+[D][09171.859012] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869dde0: new PipeWire:Interface:Factory 16
+[D][09171.859018] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869dde0: registered 16
+[D][09171.859025] pw.module    | [   impl-module.c:  252 pw_context_load_module()] 0x60d83869ae10: loaded module: libpipewire-module-session-manager
+[I][09171.859033] pw.conf      | [          conf.c:  592 load_module()] 0x60d838684ce0: loaded module libpipewire-module-session-manager
+[I][09171.859039] pw.context   | [       context.c:  352 pw_context_new()] 0x60d838684ce0: parsed 6 context.modules items
+[I][09171.859045] pw.context   | [       context.c:  357 pw_context_new()] 0x60d838684ce0: parsed 0 context.objects items
+[I][09171.859051] pw.context   | [       context.c:  360 pw_context_new()] 0x60d838684ce0: parsed 0 context.exec items
+[D][09171.859117] pw.data-loop | [     data-loop.c:   59 do_loop()] 0x60d838686500: enter thread
+[I][09171.859126] default      | [        thread.c:  105 impl_acquire_rt()] acquire_rt thread:0x73533edff6c0 prio:-1 not implemented
+[D][09171.859137] pw.metadata  | [ impl-metadata.c:   95 impl_add_listener()] metadata 0x60d83869e250:
+[D][09171.859144] pw.metadata  | [ impl-metadata.c:  299 pw_context_create_metadata()] 0x60d83869e170: new
+[D][09171.859153] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:log.level type: value:0
+[I][09171.859164] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:log.level type: value:0
+[D][09171.859171] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.rate type: value:48000
+[I][09171.859176] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.rate type: value:48000
+[D][09171.859183] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.allowed-rates type: value:[ 48000 ]
+[I][09171.859192] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.allowed-rates type: value:[ 48000 ]
+[D][09171.859199] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.quantum type: value:1024
+[I][09171.859210] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.quantum type: value:1024
+[D][09171.859216] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.min-quantum type: value:32
+[I][09171.859223] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.min-quantum type: value:32
+[D][09171.859231] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.max-quantum type: value:2048
+[I][09171.859237] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.max-quantum type: value:2048
+[D][09171.859245] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.force-quantum type: value:0
+[I][09171.859250] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.force-quantum type: value:0
+[D][09171.859255] pw.metadata  | [ impl-metadata.c:  165 impl_set_property()] 0x60d83869e250: id:0 key:clock.force-rate type: value:0
+[I][09171.859260] pw.metadata  | [ impl-metadata.c:  186 impl_set_property()] 0x60d83869e250: add id:0 key:clock.force-rate type: value:0
+[D][09171.859265] pw.global    | [        global.c:   90 pw_global_new()] 0x60d83869f690: new PipeWire:Interface:Metadata 17
+[D][09171.859270] pw.global    | [        global.c:  166 pw_global_register()] 0x60d83869f690: registered 17
+[D][09171.859275] pw.context   | [       context.c:  370 pw_context_new()] 0x60d838684ce0: created
+[D][09171.859310] pw.thread-loop | [   thread-loop.c:  288 do_loop()] 0x60d83867c880: enter thread
+[D][09171.859342] pw.core      | [          core.c:  311 core_new()] 0x60d83869f9e0: new
+[D][09171.859379] pw.mem       | [           mem.c:  143 pw_mempool_new()] 0x60d8386a05a0: new
+[D][09171.859390] mod.protocol-native | [module-protocol-: 1260 impl_new_client()] 0x60d838694840: new client 0x60d8386a0670
+[D][09171.859406] mod.protocol-native | [    connection.c:  428 pw_protocol_native_connection_new()] connection 0x60d8386a0730: new fd:-1
+[D][09171.859448] mod.protocol-native | [module-protocol-: 1288 impl_new_client()] 0x60d838694840: connect generic
+[D][09171.859458] pw.proxy     | [         proxy.c:   92 pw_proxy_new()] 0x60d8386b28d0: new 1 type PipeWire:Interface:Client/3 core-proxy:0x60d83869f9e0, marshal:0x73534c292300
+[D][09171.859475] pw.core      | [          core.c:  427 pw_context_connect_fd()] 0x60d83869f9e0: connect fd:20
+[D][09171.859483] mod.protocol-native | [    connection.c:  461 pw_protocol_native_connection_set_fd()] connection 0x60d8386a0730: fd:20
+[D][09171.859500] pw.stream    | [        stream.c: 1521 stream_new()] 0x60d8386b2a80: new "RemoteDesktop Capture Stream"
+[I][09171.859510] pw.conf      | [          conf.c:  972 pw_conf_section_for_each()] handle config '/usr/share/pipewire/client.conf' section 'stream.properties'
+[D][09171.859523] pw.stream    | [        stream.c: 1920 pw_stream_connect()] 0x60d8386b2a80: connect target:80
+[D][09171.859535] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.859545] pw.stream    | [        stream.c: 1872 find_format()] 0x60d8386b2a80: Spa:Enum:MediaType:video/Spa:Enum:MediaSubtype:raw
+[D][09171.859554] pw.stream    | [        stream.c:  399 stream_set_state()] 0x60d8386b2a80: update state from unconnected -> connecting (0) (null)
+🌊 [PipeWire] Stream state changed: UNCONNECTED -> CONNECTING
+[D][09171.859574] pw.stream    | [        stream.c: 2088 pw_stream_connect()] 0x60d8386b2a80: creating node
+[D][09171.859588] spa.system   | [        system.c:  202 impl_eventfd_create()] 0x60d8386865f8: new fd:21
+[D][09171.859596] pw.node      | [     impl-node.c: 1385 pw_context_create_node()] 0x60d8386b47c0: new fd:21
+[D][09171.859611] pw.mem       | [           mem.c:  543 pw_mempool_alloc()] 0x60d83868e860: new fd:22
+[D][09171.859627] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d83868e860: block 0x60d8386b50f0[0] mapping 0+2312 of file=22/1:18148 with size=2312
+[D][09171.859644] pw.mem       | [           mem.c:  326 memblock_map()] 0x60d83868e860: block:0x60d8386b50f0 fd:22 map:0x60d8386b51a0 ptr:0x73535e430000 (0 4096) block-ref:2
+[D][09171.859654] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d83868e860: map:0x60d8386b51e0 block:0x60d8386b50f0 fd:22 ptr:0x73535e430000 (0 2312) mapping:0x60d8386b51a0 ref:1
+[D][09171.859662] pw.mem       | [           mem.c:  571 pw_mempool_alloc()] 0x60d83868e860: block:0x60d8386b50f0 id:0 type:2 size:2312
+[D][09171.859678] pw.node      | [     impl-node.c:  935 check_properties()] 0x60d8386b47c0: name 'core-engine'
+[D][09171.859691] pw.node      | [     impl-node.c: 1075 check_properties()] 0x60d8386b47c0: driver:0 recalc:(null) active:0
+[D][09171.859701] pw.node      | [     impl-node.c: 1948 pw_impl_node_set_implementation()] 0x60d8386b47c0: implementation 0x60d8386b2bd8
+[D][09171.859708] pw.node      | [     impl-node.c: 1531 node_info()] 0x60d8386b47c0: flags:00000041 change_mask:00000007 max_in:1 max_out:0
+[D][09171.859716] pw.node      | [     impl-node.c: 1538 node_info()] 0x60d8386b47c0: flags 0->65
+[D][09171.859725] pw.node      | [     impl-node.c: 1505 update_properties()] 0x60d8386b47c0: updated 0 properties
+[D][09171.859732] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 0 id:1 (Spa:Enum:ParamId:PropInfo) 00000000:00000000
+[D][09171.859740] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 1 id:2 (Spa:Enum:ParamId:Props) 00000000:00000004
+[D][09171.859749] pw.node      | [     impl-node.c: 1562 node_info()] 0x60d8386b47c0: update param 2
+[D][09171.859755] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 2 id:3 (Spa:Enum:ParamId:EnumFormat) 00000000:00000003
+[D][09171.859763] pw.node      | [     impl-node.c: 1562 node_info()] 0x60d8386b47c0: update param 3
+[D][09171.859770] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 3 id:4 (Spa:Enum:ParamId:Format) 00000000:00000004
+[D][09171.859778] pw.node      | [     impl-node.c: 1562 node_info()] 0x60d8386b47c0: update param 4
+[D][09171.859792] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: (nil)
+[D][09171.859801] pw.node      | [     impl-node.c: 1601 node_port_info()] 0x60d8386b47c0: input port 0 added
+[D][09171.859808] pw.port      | [     impl-port.c:  592 pw_context_create_port()] 0x60d8386b5230: new input 0
+[D][09171.859816] pw.port      | [     impl-port.c:  675 pw_impl_port_set_mix()] 0x60d8386b5230: mix node (nil)->0x60d8386b5848
+[D][09171.859824] pw.port      | [     impl-port.c:  505 update_info()] 0x60d8386b5230: 0x60d8386b2cd8 flags:00000000 change_mask:0000000d
+[D][09171.859832] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 0 id:3 (Spa:Enum:ParamId:EnumFormat) 00000000:00000003
+[D][09171.859840] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 3
+[D][09171.859847] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 1 id:6 (Spa:Enum:ParamId:Meta) 00000000:00000003
+[D][09171.859855] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 6
+[D][09171.859864] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 2 id:7 (Spa:Enum:ParamId:IO) 00000000:00000003
+[D][09171.859872] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 7
+[D][09171.859879] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 3 id:4 (Spa:Enum:ParamId:Format) 00000000:00000004
+[D][09171.859886] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 4
+[D][09171.859893] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 4 id:5 (Spa:Enum:ParamId:Buffers) 00000000:00000000
+[D][09171.859901] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 5 id:15 (Spa:Enum:ParamId:Latency) 00000000:00000004
+[D][09171.859907] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 15
+[D][09171.859914] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 6 id:17 (Spa:Enum:ParamId:Tag) 00000000:00000004
+[D][09171.859921] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 17
+[D][09171.859929] pw.port      | [     impl-port.c: 1422 pw_impl_port_for_each_param()] 0x60d8386b5230: params id:7 (Spa:Enum:ParamId:IO) index:0 max:4294967295 cached:0
+[D][09171.859940] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:0 num:-1
+[D][09171.859952] pw.port      | [     impl-port.c:  874 check_param_io()] 0x60d8386b5230: got io id:1 (Spa:Enum:IO:Buffers)
+[D][09171.860032] pw.port      | [     impl-port.c: 1478 pw_impl_port_for_each_param()] 0x60d8386b5230: res 0: (Sucesso)
+[D][09171.860043] pw.port      | [     impl-port.c: 1422 pw_impl_port_for_each_param()] 0x60d8386b5230: params id:15 (Spa:Enum:ParamId:Latency) index:0 max:4294967295 cached:0
+[D][09171.860051] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:-1
+[D][09171.860061] pw.port      | [     impl-port.c: 1478 pw_impl_port_for_each_param()] 0x60d8386b5230: res -2: (Arquivo ou diretório inexistente)
+[D][09171.860069] pw.port      | [     impl-port.c: 1422 pw_impl_port_for_each_param()] 0x60d8386b5230: params id:17 (Spa:Enum:ParamId:Tag) index:0 max:4294967295 cached:0
+[D][09171.860078] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 17 (Spa:Enum:ParamId:Tag) start:0 num:-1
+[D][09171.860085] pw.port      | [     impl-port.c: 1478 pw_impl_port_for_each_param()] 0x60d8386b5230: res -2: (Arquivo ou diretório inexistente)
+[D][09171.860097] pw.port      | [     impl-port.c: 1227 pw_impl_port_add()] 0x60d8386b5230: setting mixer io
+[D][09171.860104] pw.port      | [     impl-port.c: 1234 pw_impl_port_add()] 0x60d8386b5230: 0 add to node 0x60d8386b47c0
+[D][09171.860113] pw.port      | [     impl-port.c:  103 pw_impl_port_update_state()] 0x60d8386b5230: state init -> configure ((null))
+[D][09171.860121] pw.node      | [     impl-node.c: 2460 pw_impl_node_set_active()] 0x60d8386b47c0: activate registered:0 exported:0
+[D][09171.860129] pw.stream    | [        stream.c: 2137 pw_stream_connect()] 0x60d8386b2a80: export node 0x60d8386b47c0
+[D][09171.860139] pw.proxy     | [         proxy.c:   92 pw_proxy_new()] 0x60d8386b8ad0: new 2 type PipeWire:Interface:ClientNode/5 core-proxy:0x60d83869f9e0, marshal:0x73534c24e2c0
+[D][09171.860155] mod.client-node | [   remote-node.c:  960 do_node_init()] 0x60d8386b8b48: node 0x60d8386b47c0 init
+[D][09171.860166] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 1 (Spa:Enum:ParamId:PropInfo) start:0 num:1
+[D][09171.860173] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 2 (Spa:Enum:ParamId:Props) start:0 num:1
+[D][09171.860181] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.860189] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.860197] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.860212] mod.client-node | [   remote-node.c:  151 mix_init()] port 0x60d8386b5230: mix init 0.-1
+[D][09171.860221] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.860228] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.860236] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:0 num:1
+[D][09171.860245] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:1 num:1
+[D][09171.860254] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:0 num:1
+[D][09171.860261] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:1 num:1
+[D][09171.860269] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.860276] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 5 (Spa:Enum:ParamId:Buffers) start:0 num:1
+[D][09171.860284] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:1
+[D][09171.860294] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 17 (Spa:Enum:ParamId:Tag) start:0 num:1
+[D][09171.860305] pw.core      | [          core.c:  284 pw_core_export()] 0x60d83869f9e0: export:PipeWire:Interface:Node proxy:0x60d8386b8ad0
+✅ [PipeWire] Stream created, format requested...
+[D][09171.860350] mod.protocol-native | [module-protocol-: 1088 on_remote_data()] 0x60d8386a0670: connected, fd 20
+[D][09171.860575] pw.core      | [          core.c:   71 core_event_bound_id()] 0x60d83869f9e0: proxy id 1 bound 82
+[D][09171.860590] pw.proxy     | [         proxy.c:  143 pw_proxy_set_bound_id()] 0x60d8386b28d0: id:1 bound:82
+[D][09171.860598] pw.core      | [          core.c:   97 core_event_bound_props()] 0x60d83869f9e0: proxy id 1 bound 82
+[D][09171.860608] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:0
+[D][09171.860617] pw.core      | [          core.c:   26 core_event_ping()] 0x60d83869f9e0: object 2 ping 1073742000
+[D][09171.860808] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:9
+[D][09171.860825] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:23
+[D][09171.860833] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:24
+[D][09171.860840] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:25
+[D][09171.860849] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:26
+[D][09171.860856] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 0 type:2 fd:9 flags:3
+[D][09171.860864] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330001d20 id:0 flags:00000003 type:2 fd:9
+[D][09171.860872] pw.core      | [          core.c:   71 core_event_bound_id()] 0x60d83869f9e0: proxy id 2 bound 83
+[D][09171.860878] pw.proxy     | [         proxy.c:  143 pw_proxy_set_bound_id()] 0x60d8386b8ad0: id:2 bound:83
+[D][09171.860887] pw.core      | [          core.c:   97 core_event_bound_props()] 0x60d83869f9e0: proxy id 2 bound 83
+[D][09171.860891] mod.client-node | [   remote-node.c: 1163 client_node_bound_props()] 0x60d8386b8b48: bound 83
+[D][09171.860898] pw.stream    | [        stream.c:  399 stream_set_state()] 0x60d8386b2a80: update state from connecting -> paused (0) (null)
+🌊 [PipeWire] Stream state changed: CONNECTING -> PAUSED
+[D][09171.860909] pw.stream    | [        stream.c: 2332 pw_stream_set_active()] 0x60d8386b2a80: active:1
+[D][09171.860920] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330001d20[0] mapping 0+2312 of file=9/1:18149 with size=2312
+[D][09171.860931] pw.mem       | [           mem.c:  326 memblock_map()] 0x60d8386a05a0: block:0x735330001d20 fd:9 map:0x735330001f40 ptr:0x73535e42f000 (0 4096) block-ref:2
+[D][09171.860942] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330002000 block:0x735330001d20 fd:9 ptr:0x73535e42f000 (0 2312) mapping:0x735330001f40 ref:1
+[D][09171.860950] mod.client-node | [   remote-node.c:  216 client_node_transport()] remote-node 0x60d8386b8ad0: fds:24 23 node:83 activation:0x73535e42f000
+[D][09171.860958] spa.system   | [        system.c:   68 impl_close()] 0x60d8386865f8: close fd:21
+[D][09171.860969] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330001d20[0] mapping 0+2312 of file=9/1:18149 with size=2312
+[D][09171.860976] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330001f40 offset:(0 <= 0) end:(4096 >= 2312)
+[D][09171.860981] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330001d20 id:0 fd:9 offs:0 size:2312 ref:2
+[D][09171.860993] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x7353300020e0 block:0x735330001d20 fd:9 ptr:0x73535e42f000 (0 2312) mapping:0x735330001f40 ref:2
+[D][09171.861000] mod.client-node | [   remote-node.c:  841 client_node_set_activation()] node 0x60d8386b47c0: our activation 83: 0 0x73535e42f000 0 2312
+[D][09171.861007] mod.client-node | [   remote-node.c:  865 client_node_set_activation()] node 0x60d8386b47c0: add link 0x735330002130: memid:0 fd:25 id:83 state:0x73535e42f008 pending:0/0
+[D][09171.861018] pw.mem       | [           mem.c:  881 pw_mempool_find_tag()] 0x60d8386a05a0: find tag 83:4294967295:7:0:0 size:20
+[D][09171.861028] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330001d20[0] mapping 560+1688 of file=9/1:18149 with size=2312
+[D][09171.861034] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330001f40 offset:(0 <= 560) end:(4096 >= 2248)
+[D][09171.861039] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330001d20 id:0 fd:9 offs:560 size:1688 ref:2
+[D][09171.861048] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330002220 block:0x735330001d20 fd:9 ptr:0x73535e42f230 (560 1688) mapping:0x735330001f40 ref:3
+[D][09171.861055] pw.mem       | [           mem.c:  417 pw_memblock_map()] 0x60d8386a05a0: tag:83:4294967295:7:0:0
+[D][09171.861060] mod.client-node | [   remote-node.c:  424 client_node_set_io()] node 0x60d8386b8ad0: set io Spa:Enum:IO:Position 0x73535e42f230
+[D][09171.861068] pw.stream    | [        stream.c:  517 impl_set_io()] 0x60d8386b2a80: set io id 7 (Spa:Enum:IO:Position) 0x73535e42f230 1688
+[D][09171.861085] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330001d20[0] mapping 0+2312 of file=9/1:18149 with size=2312
+[D][09171.861093] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330001f40 offset:(0 <= 0) end:(4096 >= 2312)
+[D][09171.861102] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330001d20 id:0 fd:9 offs:0 size:2312 ref:2
+[D][09171.861107] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330002270 block:0x735330001d20 fd:9 ptr:0x73535e42f000 (0 2312) mapping:0x735330001f40 ref:4
+[D][09171.861113] mod.client-node | [   remote-node.c:  841 client_node_set_activation()] node 0x60d8386b47c0: our activation 83: 0 0x73535e42f000 0 2312
+[D][09171.861122] mod.client-node | [   remote-node.c:  865 client_node_set_activation()] node 0x60d8386b47c0: add link 0x7353300022c0: memid:0 fd:26 id:83 state:0x73535e42f008 pending:0/0
+[D][09171.861131] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:5
+[D][09171.861139] pw.mem       | [           mem.c:  881 pw_mempool_find_tag()] 0x60d8386a05a0: find tag 83:4294967295:3:0:0 size:20
+[D][09171.861147] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330001d20[0] mapping 560+160 of file=9/1:18149 with size=2312
+[D][09171.861153] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330001f40 offset:(0 <= 560) end:(4096 >= 720)
+[D][09171.861158] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330001d20 id:0 fd:9 offs:560 size:160 ref:2
+[D][09171.861163] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x7353300023b0 block:0x735330001d20 fd:9 ptr:0x73535e42f230 (560 160) mapping:0x735330001f40 ref:5
+[D][09171.861172] pw.mem       | [           mem.c:  417 pw_memblock_map()] 0x60d8386a05a0: tag:83:4294967295:3:0:0
+[D][09171.861179] mod.client-node | [   remote-node.c:  424 client_node_set_io()] node 0x60d8386b8ad0: set io Spa:Enum:IO:Clock 0x73535e42f230
+[D][09171.861184] pw.stream    | [        stream.c:  517 impl_set_io()] 0x60d8386b2a80: set io id 3 (Spa:Enum:IO:Clock) 0x73535e42f230 160
+[D][09171.862308] mod.client-node | [   remote-node.c:  377 client_node_set_param()] node 0x60d8386b8ad0: set_param Spa:Enum:ParamId:Props:
+[D][09171.862321] pw.node      | [     impl-node.c: 1531 node_info()] 0x60d8386b47c0: flags:00000041 change_mask:00000007 max_in:1 max_out:0
+[D][09171.862330] pw.node      | [     impl-node.c: 1505 update_properties()] 0x60d8386b47c0: updated 0 properties
+[D][09171.862335] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 0 id:1 (Spa:Enum:ParamId:PropInfo) 00000000:00000000
+[D][09171.862341] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 1 id:2 (Spa:Enum:ParamId:Props) 00000004:00000004
+[D][09171.862350] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 2 id:3 (Spa:Enum:ParamId:EnumFormat) 00000003:00000003
+[D][09171.862358] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 3 id:4 (Spa:Enum:ParamId:Format) 00000004:00000004
+[D][09171.862368] mod.client-node | [   remote-node.c: 1023 node_info_changed()] info changed 0x60d8386b8b48
+[D][09171.862382] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 1 (Spa:Enum:ParamId:PropInfo) start:0 num:1
+[D][09171.862393] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 2 (Spa:Enum:ParamId:Props) start:0 num:1
+[D][09171.862401] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.862408] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.862414] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.862425] pw.node      | [     impl-node.c: 2199 pw_impl_node_for_each_param()] 0x60d8386b47c0: params id:1 (Spa:Enum:ParamId:PropInfo) index:0 max:4294967295 cached:0
+[D][09171.862432] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 1 (Spa:Enum:ParamId:PropInfo) start:0 num:-1
+[D][09171.862438] pw.node      | [     impl-node.c: 2199 pw_impl_node_for_each_param()] 0x60d8386b47c0: params id:2 (Spa:Enum:ParamId:Props) index:0 max:4294967295 cached:0
+[D][09171.862446] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 2 (Spa:Enum:ParamId:Props) start:0 num:-1
+[D][09171.862454] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.862459] pw.node      | [     impl-node.c: 1595 node_port_info()] 0x60d8386b47c0: input port 0 changed
+[D][09171.862464] pw.port      | [     impl-port.c:  505 update_info()] 0x60d8386b5230: 0x60d8386b2cd8 flags:00000000 change_mask:0000000d
+[D][09171.862473] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 0 id:3 (Spa:Enum:ParamId:EnumFormat) 00000003:00000003
+[D][09171.862483] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 1 id:6 (Spa:Enum:ParamId:Meta) 00000003:00000003
+[D][09171.862489] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 2 id:7 (Spa:Enum:ParamId:IO) 00000003:00000003
+[D][09171.862495] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 3 id:4 (Spa:Enum:ParamId:Format) 00000004:00000004
+[D][09171.862502] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 4 id:5 (Spa:Enum:ParamId:Buffers) 00000000:00000000
+[D][09171.862510] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 5 id:15 (Spa:Enum:ParamId:Latency) 00000004:00000004
+[D][09171.862515] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 6 id:17 (Spa:Enum:ParamId:Tag) 00000004:00000004
+[D][09171.862520] mod.client-node | [   remote-node.c: 1046 node_port_info_changed()] info changed 0x60d8386b8b48
+[D][09171.862528] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.862536] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.862545] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:0 num:1
+[D][09171.862554] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:1 num:1
+[D][09171.862560] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:0 num:1
+[D][09171.862565] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:1 num:1
+[D][09171.862570] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.862576] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 5 (Spa:Enum:ParamId:Buffers) start:0 num:1
+[D][09171.862584] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:1
+[D][09171.862591] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 17 (Spa:Enum:ParamId:Tag) start:0 num:1
+[D][09171.862599] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:0
+[D][09171.862605] pw.core      | [          core.c:   26 core_event_ping()] 0x60d83869f9e0: object 2 ping 1073742009
+[D][09171.863212] mod.client-node | [   remote-node.c:  916 client_node_port_set_mix_info()] 0x60d8386b8b48: 0:0:0 peer:84
+[D][09171.863234] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.863242] mod.client-node | [   remote-node.c:  151 mix_init()] port 0x60d8386b5230: mix init 0.0
+[D][09171.863251] pw.port      | [     impl-port.c:  303 pw_impl_port_init_mix()] 0x60d8386b5230: init mix n_mix:1 0.0 id:0 peer:84 io:(nil): (Sucesso)
+[D][09171.863260] pw.port      | [     impl-port.c:  308 pw_impl_port_init_mix()] 0x60d8386b5230: setting port io
+[D][09171.863269] pw.stream    | [        stream.c:  770 impl_port_set_io()] 0x60d8386b2a80: id:1 (Spa:Enum:IO:Buffers) 0x60d8386b57b0 8
+[D][09171.863277] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:0
+[D][09171.863286] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.863294] mod.client-node | [   remote-node.c:  565 client_node_port_set_param()] port 0x60d8386b5230: set_param Spa:Enum:ParamId:Latency 0x60d8386aa938
+[D][09171.863302] pw.port      | [     impl-port.c: 1709 pw_impl_port_set_param()] 0x60d8386b5230: 1 set param 15 0x60d8386aa938
+[D][09171.863310] pw.stream    | [        stream.c:  916 impl_port_set_param()] 0x60d8386b2a80: port:0.0 id:15 (Spa:Enum:ParamId:Latency) param:0x60d8386aa938 disconnecting:0
+[D][09171.863320] pw.stream    | [        stream.c:  925 impl_port_set_param()] Object: size 176, type Spa:Pod:Object:Param:Latency (262155), id Spa:Enum:ParamId:Latency (15)
+[D][09171.863329] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:direction (1), flags 00000000
+[D][09171.863338] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Id 1        (Spa:Enum:Direction:Output)
+[D][09171.863347] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:minQuantum (2), flags 00000000
+[D][09171.863354] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Float 0,000000
+[D][09171.863364] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:maxQuantum (3), flags 00000000
+[D][09171.863373] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Float 0,000000
+[D][09171.863380] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:minRate (4), flags 00000000
+[D][09171.863388] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Int 0
+[D][09171.863399] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:maxRate (5), flags 00000000
+[D][09171.863407] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Int 0
+[D][09171.863413] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:minNs (6), flags 00000000
+[D][09171.863420] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Long 0
+[D][09171.863425] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Latency:maxNs (7), flags 00000000
+[D][09171.863430] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Long 0
+[I][09171.863435] pw.stream    | [        stream.c:  894 parse_latency()] stream 0x60d8386b2a80: set output latency 0,000000-0,000000 0-0 0-0
+[D][09171.863445] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.863452] pw.node      | [     impl-node.c: 1595 node_port_info()] 0x60d8386b47c0: input port 0 changed
+[D][09171.863457] pw.port      | [     impl-port.c:  505 update_info()] 0x60d8386b5230: 0x60d8386b2cd8 flags:00000000 change_mask:00000008
+[D][09171.863462] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 0 id:3 (Spa:Enum:ParamId:EnumFormat) 00000003:00000003
+[D][09171.863471] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 1 id:6 (Spa:Enum:ParamId:Meta) 00000003:00000003
+[D][09171.863477] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 2 id:7 (Spa:Enum:ParamId:IO) 00000003:00000003
+[D][09171.863482] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 3 id:4 (Spa:Enum:ParamId:Format) 00000004:00000004
+[D][09171.863487] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 4 id:5 (Spa:Enum:ParamId:Buffers) 00000000:00000000
+[D][09171.863492] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 5 id:15 (Spa:Enum:ParamId:Latency) 00000004:00000007
+[D][09171.863500] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 15
+[D][09171.863506] pw.port      | [     impl-port.c: 1422 pw_impl_port_for_each_param()] 0x60d8386b5230: params id:15 (Spa:Enum:ParamId:Latency) index:0 max:4294967295 cached:0
+[D][09171.863511] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:-1
+[D][09171.863517] pw.port      | [     impl-port.c: 1478 pw_impl_port_for_each_param()] 0x60d8386b5230: res 0: (Sucesso)
+[D][09171.863524] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 6 id:17 (Spa:Enum:ParamId:Tag) 00000004:00000004
+[D][09171.863532] mod.client-node | [   remote-node.c: 1046 node_port_info_changed()] info changed 0x60d8386b8b48
+[D][09171.863536] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.863542] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.863547] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:0 num:1
+[D][09171.863552] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:1 num:1
+[D][09171.863560] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:0 num:1
+[D][09171.863568] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:1 num:1
+[D][09171.863575] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.863583] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 5 (Spa:Enum:ParamId:Buffers) start:0 num:1
+[D][09171.863589] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:1
+[D][09171.863596] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:1 num:1
+[D][09171.863601] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 17 (Spa:Enum:ParamId:Tag) start:0 num:1
+[D][09171.863610] pw.port      | [     impl-port.c: 1716 pw_impl_port_set_param()] 0x60d8386b5230: 1 set param on node 0:0 id:15 (Spa:Enum:ParamId:Latency): 0 (Sucesso)
+[D][09171.863621] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.863627] mod.client-node | [   remote-node.c:  565 client_node_port_set_param()] port 0x60d8386b5230: set_param Spa:Enum:ParamId:Format 0x60d8386aa8c8
+[D][09171.863632] pw.port      | [     impl-port.c: 1709 pw_impl_port_set_param()] 0x60d8386b5230: 1 set param 4 0x60d8386aa8c8
+[D][09171.863640] pw.stream    | [        stream.c:  916 impl_port_set_param()] 0x60d8386b2a80: port:0.0 id:4 (Spa:Enum:ParamId:Format) param:0x60d8386aa8c8 disconnecting:0
+[D][09171.863648] pw.stream    | [        stream.c:  925 impl_port_set_param()] Object: size 264, type Spa:Pod:Object:Param:Format (262147), id Spa:Enum:ParamId:Format (4)
+[D][09171.863656] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:mediaType (1), flags 00000000
+[D][09171.863664] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Choice: type Spa:Enum:Choice:None, flags 00000000 20 4
+[D][09171.863671] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Id 2        (Spa:Enum:MediaType:video)
+[D][09171.863679] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:mediaSubtype (2), flags 00000000
+[D][09171.863687] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Choice: type Spa:Enum:Choice:None, flags 00000000 20 4
+[D][09171.863693] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Id 1        (Spa:Enum:MediaSubtype:raw)
+[D][09171.863701] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:Video:format (131073), flags 00000000
+[D][09171.863709] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Choice: type Spa:Enum:Choice:None, flags 00000000 20 4
+[D][09171.863714] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Id 8        (Spa:Enum:VideoFormat:BGRx)
+[D][09171.863719] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:Video:size (131075), flags 00000000
+[D][09171.863727] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Choice: type Spa:Enum:Choice:None, flags 00000000 40 8
+[D][09171.863734] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Rectangle 1366x768
+[D][09171.863739] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Rectangle 1366x768
+[D][09171.863743] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Rectangle 1366x768
+[D][09171.863748] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:Video:framerate (131076), flags 00000000
+[D][09171.863755] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Fraction 0/1
+[D][09171.863762] pw.stream    | [        stream.c:  925 impl_port_set_param()]   Prop: key Spa:Pod:Object:Param:Format:Video:maxFramerate (131077), flags 00000000
+[D][09171.863767] pw.stream    | [        stream.c:  925 impl_port_set_param()]     Choice: type Spa:Enum:Choice:None, flags 00000000 40 8
+[D][09171.863772] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Fraction 983105/16384
+[D][09171.863776] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Fraction 1/1
+[D][09171.863787] pw.stream    | [        stream.c:  925 impl_port_set_param()]       Fraction 983105/16384
+[D][09171.863798] pw.stream    | [        stream.c:  849 clear_buffers()] 0x60d8386b2a80: clear buffers 0
+[D][09171.863816] pw.stream    | [        stream.c: 2218 pw_stream_update_params()] 0x60d8386b2a80: update params
+[D][09171.863826] pw.stream    | [        stream.c: 2332 pw_stream_set_active()] 0x60d8386b2a80: active:1
+[D][09171.863832] pw.node      | [     impl-node.c: 1531 node_info()] 0x60d8386b47c0: flags:00000041 change_mask:00000004 max_in:1 max_out:0
+[D][09171.863838] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 0 id:1 (Spa:Enum:ParamId:PropInfo) 00000000:00000000
+[D][09171.863843] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 1 id:2 (Spa:Enum:ParamId:Props) 00000004:00000004
+[D][09171.863848] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 2 id:3 (Spa:Enum:ParamId:EnumFormat) 00000003:00000003
+[D][09171.863856] pw.node      | [     impl-node.c: 1554 node_info()] 0x60d8386b47c0: param 3 id:4 (Spa:Enum:ParamId:Format) 00000004:00000007
+[D][09171.863863] pw.node      | [     impl-node.c: 1562 node_info()] 0x60d8386b47c0: update param 4
+[D][09171.863868] mod.client-node | [   remote-node.c: 1023 node_info_changed()] info changed 0x60d8386b8b48
+[D][09171.863873] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 1 (Spa:Enum:ParamId:PropInfo) start:0 num:1
+[D][09171.863880] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 2 (Spa:Enum:ParamId:Props) start:0 num:1
+[D][09171.863888] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.863895] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.863900] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.863907] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:1 num:1
+[D][09171.863917] pw.node      | [     impl-node.c: 2199 pw_impl_node_for_each_param()] 0x60d8386b47c0: params id:1 (Spa:Enum:ParamId:PropInfo) index:0 max:4294967295 cached:1
+[D][09171.863923] pw.node      | [     impl-node.c: 2199 pw_impl_node_for_each_param()] 0x60d8386b47c0: params id:2 (Spa:Enum:ParamId:Props) index:0 max:4294967295 cached:1
+[D][09171.863928] pw.node      | [     impl-node.c: 2296 pw_impl_node_find_port()] 0x60d8386b47c0: return input port 0: 0x60d8386b5230
+[D][09171.863933] pw.node      | [     impl-node.c: 1595 node_port_info()] 0x60d8386b47c0: input port 0 changed
+[D][09171.863940] pw.port      | [     impl-port.c:  505 update_info()] 0x60d8386b5230: 0x60d8386b2cd8 flags:00000000 change_mask:00000008
+[D][09171.863947] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 0 id:3 (Spa:Enum:ParamId:EnumFormat) 00000003:00000003
+[D][09171.863952] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 1 id:6 (Spa:Enum:ParamId:Meta) 00000003:00000003
+[D][09171.863957] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 2 id:7 (Spa:Enum:ParamId:IO) 00000003:00000003
+[D][09171.863962] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 3 id:4 (Spa:Enum:ParamId:Format) 00000004:00000007
+[D][09171.863970] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 4
+[D][09171.863975] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 4 id:5 (Spa:Enum:ParamId:Buffers) 00000000:00000003
+[D][09171.863981] pw.port      | [     impl-port.c:  535 update_info()] 0x60d8386b5230: update param 5
+[D][09171.863985] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 5 id:15 (Spa:Enum:ParamId:Latency) 00000007:00000007
+[D][09171.863992] pw.port      | [     impl-port.c:  527 update_info()] 0x60d8386b5230: param 6 id:17 (Spa:Enum:ParamId:Tag) 00000004:00000004
+[D][09171.864000] mod.client-node | [   remote-node.c: 1046 node_port_info_changed()] info changed 0x60d8386b8b48
+[D][09171.864007] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:0 num:1
+[D][09171.864012] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 3 (Spa:Enum:ParamId:EnumFormat) start:1 num:1
+[D][09171.864021] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:0 num:1
+[D][09171.864029] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 6 (Spa:Enum:ParamId:Meta) start:1 num:1
+[D][09171.864039] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:0 num:1
+[D][09171.864047] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 7 (Spa:Enum:ParamId:IO) start:1 num:1
+[D][09171.864055] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:0 num:1
+[D][09171.864064] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 4 (Spa:Enum:ParamId:Format) start:1 num:1
+[D][09171.864072] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 5 (Spa:Enum:ParamId:Buffers) start:0 num:1
+[D][09171.864077] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 5 (Spa:Enum:ParamId:Buffers) start:1 num:1
+[D][09171.864083] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:0 num:1
+[D][09171.864089] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 15 (Spa:Enum:ParamId:Latency) start:1 num:1
+[D][09171.864102] pw.stream    | [        stream.c:  561 enum_params()] 0x60d8386b2a80: param id 17 (Spa:Enum:ParamId:Tag) start:0 num:1
+[D][09171.864114] pw.port      | [     impl-port.c: 1716 pw_impl_port_set_param()] 0x60d8386b5230: 1 set param on node 0:0 id:4 (Spa:Enum:ParamId:Format): 0 (Sucesso)
+[D][09171.864123] pw.port      | [     impl-port.c:  719 setup_mixer()] 0x60d8386b5230: Spa:Enum:MediaType:video/Spa:Enum:MediaSubtype:raw
+[D][09171.864128] pw.port      | [     impl-port.c: 1742 pw_impl_port_set_param()] 0x60d8386b5230: 1 0x60d8386aa8c8 0
+[D][09171.864134] pw.buffers   | [       buffers.c:  347 pw_buffers_clear()] 0x60d8386b56d8: clear 0 buffers:(nil)
+[D][09171.864141] pw.buffers   | [       buffers.c:  347 pw_buffers_clear()] 0x60d8386b5758: clear 0 buffers:(nil)
+[D][09171.864148] pw.port      | [     impl-port.c:  103 pw_impl_port_update_state()] 0x60d8386b5230: state configure -> ready ((null))
+[D][09171.864154] mod.client-node | [   remote-node.c:  529 clear_buffers()] port 0x60d8386b5230: clear 0 buffers mix:-1
+[D][09171.864161] pw.port      | [     impl-port.c: 1841 pw_impl_port_use_buffers()] 0x60d8386b5230: 0:0.0: 0 buffers flags:0 state:2 n_mix:1
+[D][09171.864168] mod.client-node | [   remote-node.c:  529 clear_buffers()] port 0x60d8386b5230: clear 0 buffers mix:0
+[D][09171.864175] pw.port      | [     impl-port.c: 1841 pw_impl_port_use_buffers()] 0x60d8386b5230: 0:0.0: 0 buffers flags:0 state:2 n_mix:1
+[D][09171.864182] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:0
+[D][09171.864190] pw.core      | [          core.c:   26 core_event_ping()] 0x60d83869f9e0: object 2 ping 1073742013
+[D][09171.864619] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:21
+[D][09171.864642] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:27
+[D][09171.864649] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:28
+[D][09171.864654] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:29
+[D][09171.864658] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:30
+[D][09171.864667] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:31
+[D][09171.864674] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:32
+[D][09171.864680] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:33
+[D][09171.864685] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:34
+[D][09171.864691] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 1 type:2 fd:21 flags:3
+[D][09171.864698] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330003430 id:1 flags:00000003 type:2 fd:21
+[D][09171.864706] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 2 type:2 fd:27 flags:3
+[D][09171.864712] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x7353300034e0 id:2 flags:00000003 type:2 fd:27
+[D][09171.864718] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 3 type:2 fd:28 flags:3
+[D][09171.864722] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330003590 id:3 flags:00000003 type:2 fd:28
+[D][09171.864728] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 4 type:2 fd:29 flags:3
+[D][09171.864736] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330003640 id:4 flags:00000003 type:2 fd:29
+[D][09171.864742] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 5 type:2 fd:30 flags:3
+[D][09171.864747] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x7353300036f0 id:5 flags:00000003 type:2 fd:30
+[D][09171.864752] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 6 type:2 fd:31 flags:3
+[D][09171.864759] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x7353300037a0 id:6 flags:00000003 type:2 fd:31
+[D][09171.864767] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 7 type:2 fd:32 flags:3
+[D][09171.864772] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330003850 id:7 flags:00000003 type:2 fd:32
+[D][09171.864777] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 8 type:2 fd:33 flags:3
+[D][09171.864792] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330003900 id:8 flags:00000003 type:2 fd:33
+[D][09171.864799] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 9 type:2 fd:34 flags:3
+[D][09171.864806] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x7353300039b0 id:9 flags:00000003 type:2 fd:34
+[D][09171.864814] mod.client-node | [   remote-node.c:  169 find_mix()] port 0x60d8386b5230: found mix 0:0.0
+[D][09171.864819] mod.client-node | [   remote-node.c:  529 clear_buffers()] port 0x60d8386b5230: clear 0 buffers mix:0
+[D][09171.864825] pw.port      | [     impl-port.c: 1841 pw_impl_port_use_buffers()] 0x60d8386b5230: 0:0.0: 0 buffers flags:0 state:2 n_mix:1
+[D][09171.864831] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 0+24 of file=21/1:18150 with size=512
+[D][09171.864842] pw.mem       | [           mem.c:  326 memblock_map()] 0x60d8386a05a0: block:0x735330003430 fd:21 map:0x735330003a60 ptr:0x73535e42e000 (0 4096) block-ref:2
+[D][09171.864849] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003aa0 block:0x735330003430 fd:21 ptr:0x73535e42e000 (0 24) mapping:0x735330003a60 ref:1
+[D][09171.864858] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:0 offset:0 size:24 0x735330001cc0
+[D][09171.864864] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x7353300034e0 for 2
+[D][09171.864871] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 2 -> fd 27 maxsize 4196352
+[D][09171.864877] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 64+24 of file=21/1:18150 with size=512
+[D][09171.864882] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 64) end:(4096 >= 88)
+[D][09171.864887] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:64 size:24 ref:2
+[D][09171.864892] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003b50 block:0x735330003430 fd:21 ptr:0x73535e42e040 (64 24) mapping:0x735330003a60 ref:2
+[D][09171.864899] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:1 offset:64 size:24 0x735330003af0
+[D][09171.864904] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x735330003590 for 3
+[D][09171.864909] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 3 -> fd 28 maxsize 4196352
+[D][09171.864914] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 128+24 of file=21/1:18150 with size=512
+[D][09171.864919] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 128) end:(4096 >= 152)
+[D][09171.864924] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:128 size:24 ref:2
+[D][09171.864929] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003c00 block:0x735330003430 fd:21 ptr:0x73535e42e080 (128 24) mapping:0x735330003a60 ref:3
+[D][09171.864935] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:2 offset:128 size:24 0x735330003ba0
+[D][09171.864940] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x735330003640 for 4
+[D][09171.864944] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 4 -> fd 29 maxsize 4196352
+[D][09171.864949] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 192+24 of file=21/1:18150 with size=512
+[D][09171.864954] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 192) end:(4096 >= 216)
+[D][09171.864959] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:192 size:24 ref:2
+[D][09171.864964] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003cb0 block:0x735330003430 fd:21 ptr:0x73535e42e0c0 (192 24) mapping:0x735330003a60 ref:4
+[D][09171.864969] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:3 offset:192 size:24 0x735330003c50
+[D][09171.864976] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x7353300036f0 for 5
+[D][09171.864983] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 5 -> fd 30 maxsize 4196352
+[D][09171.864990] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 256+24 of file=21/1:18150 with size=512
+[D][09171.864996] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 256) end:(4096 >= 280)
+[D][09171.865003] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:256 size:24 ref:2
+[D][09171.865009] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003d60 block:0x735330003430 fd:21 ptr:0x73535e42e100 (256 24) mapping:0x735330003a60 ref:5
+[D][09171.865016] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:4 offset:256 size:24 0x735330003d00
+[D][09171.865022] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x7353300037a0 for 6
+[D][09171.865028] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 6 -> fd 31 maxsize 4196352
+[D][09171.865035] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 320+24 of file=21/1:18150 with size=512
+[D][09171.865044] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 320) end:(4096 >= 344)
+[D][09171.865049] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:320 size:24 ref:2
+[D][09171.865054] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003e10 block:0x735330003430 fd:21 ptr:0x73535e42e140 (320 24) mapping:0x735330003a60 ref:6
+[D][09171.865064] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:5 offset:320 size:24 0x735330003db0
+[D][09171.865070] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x735330003850 for 7
+[D][09171.865074] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 7 -> fd 32 maxsize 4196352
+[D][09171.865078] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 384+24 of file=21/1:18150 with size=512
+[D][09171.865086] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 384) end:(4096 >= 408)
+[D][09171.865094] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:384 size:24 ref:2
+[D][09171.865099] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003ec0 block:0x735330003430 fd:21 ptr:0x73535e42e180 (384 24) mapping:0x735330003a60 ref:7
+[D][09171.865105] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:6 offset:384 size:24 0x735330003e60
+[D][09171.865110] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x735330003900 for 8
+[D][09171.865114] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 8 -> fd 33 maxsize 4196352
+[D][09171.865122] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330003430[1] mapping 448+24 of file=21/1:18150 with size=512
+[D][09171.865128] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x735330003a60 offset:(0 <= 448) end:(4096 >= 472)
+[D][09171.865133] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330003430 id:1 fd:21 offs:448 size:24 ref:2
+[D][09171.865138] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330003f70 block:0x735330003430 fd:21 ptr:0x73535e42e1c0 (448 24) mapping:0x735330003a60 ref:8
+[D][09171.865143] mod.client-node | [   remote-node.c:  667 client_node_port_use_buffers()] add buffer mem:1 id:7 offset:448 size:24 0x735330003f10
+[D][09171.865154] pw.mem       | [           mem.c:  855 pw_mempool_find_id()] 0x60d8386a05a0: block:0x7353300039b0 for 9
+[D][09171.865160] mod.client-node | [   remote-node.c:  704 client_node_port_use_buffers()]  data 0 9 -> fd 34 maxsize 4196352
+[D][09171.865164] pw.port      | [     impl-port.c: 1841 pw_impl_port_use_buffers()] 0x60d8386b5230: 0:0.0: 8 buffers flags:0 state:2 n_mix:1
+[D][09171.865170] pw.port      | [     impl-port.c: 1815 negotiate_mixer_buffers()] 0x60d8386b5230: 0.0 use 8 buffers on node: 0x60d8386b2bd8
+[D][09171.865176] pw.stream    | [        stream.c:  963 impl_port_use_buffers()] 0x60d8386b2a80: port:0.0 buffers:8 disconnecting:0
+[D][09171.865184] pw.stream    | [        stream.c:  849 clear_buffers()] 0x60d8386b2a80: clear buffers 0
+[D][09171.865191] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:0 datas:1, mapped size 0
+[D][09171.865196] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:1 datas:1, mapped size 0
+[D][09171.865201] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:2 datas:1, mapped size 0
+[D][09171.865209] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:3 datas:1, mapped size 0
+[D][09171.865214] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:4 datas:1, mapped size 0
+[D][09171.865219] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:5 datas:1, mapped size 0
+[D][09171.865223] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:6 datas:1, mapped size 0
+[D][09171.865229] pw.stream    | [        stream.c: 1005 impl_port_use_buffers()] 0x60d8386b2a80: got buffer id:7 datas:1, mapped size 0
+[D][09171.865241] pw.port      | [     impl-port.c:  103 pw_impl_port_update_state()] 0x60d8386b5230: state ready -> paused ((null))
+[D][09171.865251] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:9
+[D][09171.865258] pw.core      | [          core.c:   26 core_event_ping()] 0x60d83869f9e0: object 2 ping 1073742024
+[D][09171.865399] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:35
+[D][09171.865412] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:36
+[D][09171.865421] mod.protocol-native | [    connection.c:  249 refill_buffer()] connection 0x60d8386a0730: buffer:0x60d8386a0750 got fd:37
+[D][09171.865428] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 10 type:2 fd:35 flags:3
+[D][09171.865436] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330004020 id:10 flags:00000003 type:2 fd:35
+[D][09171.865444] pw.mem       | [           mem.c:  881 pw_mempool_find_tag()] 0x60d8386a05a0: find tag 83:4294967295:7:0:0 size:20
+[D][09171.865451] pw.mem       | [           mem.c:  887 pw_mempool_find_tag()] 0x60d8386a05a0: found 0x735330002220
+[D][09171.865461] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330004020[10] mapping 560+1688 of file=35/1:19148 with size=2312
+[D][09171.865471] pw.mem       | [           mem.c:  326 memblock_map()] 0x60d8386a05a0: block:0x735330004020 fd:35 map:0x7353300040d0 ptr:0x73535e42d000 (0 4096) block-ref:2
+[D][09171.865481] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330004110 block:0x735330004020 fd:35 ptr:0x73535e42d230 (560 1688) mapping:0x7353300040d0 ref:1
+[D][09171.865487] pw.mem       | [           mem.c:  417 pw_memblock_map()] 0x60d8386a05a0: tag:83:4294967295:7:0:0
+[D][09171.865493] mod.client-node | [   remote-node.c:  424 client_node_set_io()] node 0x60d8386b8ad0: set io Spa:Enum:IO:Position 0x73535e42d230
+[D][09171.865503] pw.stream    | [        stream.c:  517 impl_set_io()] 0x60d8386b2a80: set io id 7 (Spa:Enum:IO:Position) 0x73535e42d230 1688
+[D][09171.865536] pw.mem       | [           mem.c:  457 pw_memmap_free()] 0x60d8386a05a0: map:0x735330002220 block:0x735330001d20 fd:9 ptr:0x73535e42f230 mapping:0x735330001f40 ref:5
+[D][09171.865546] mod.client-node | [   remote-node.c:  841 client_node_set_activation()] node 0x60d8386b47c0: our activation 83: 4294967295 (nil) 0 0
+[D][09171.865554] mod.client-node | [   remote-node.c:  876 client_node_set_activation()] node 0x60d8386b47c0: remove link 0x735330002130: id:83 state:0x73535e42f008 pending:0/0
+[D][09171.865564] mod.client-node | [   remote-node.c:  112 clear_link()] link 0x735330002130
+[D][09171.865586] pw.mem       | [           mem.c:  457 pw_memmap_free()] 0x60d8386a05a0: map:0x7353300020e0 block:0x735330001d20 fd:9 ptr:0x73535e42f000 mapping:0x735330001f40 ref:4
+[D][09171.865622] spa.system   | [        system.c:   68 impl_close()] 0x60d8386865f8: close fd:25
+[D][09171.865632] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330004020[10] mapping 0+2312 of file=35/1:19148 with size=2312
+[D][09171.865638] pw.mem       | [           mem.c:  260 memblock_find_mapping()] 0x60d8386a05a0: check 0x7353300040d0 offset:(0 <= 0) end:(4096 >= 2312)
+[D][09171.865644] pw.mem       | [           mem.c:  264 memblock_find_mapping()] 0x60d8386a05a0: found 0x735330004020 id:10 fd:35 offs:0 size:2312 ref:2
+[D][09171.865649] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330004200 block:0x735330004020 fd:35 ptr:0x73535e42d000 (0 2312) mapping:0x7353300040d0 ref:2
+[D][09171.865656] mod.client-node | [   remote-node.c:  844 client_node_set_activation()] node 0x60d8386b47c0: set activation 80: 10 0x73535e42d000 0 2312
+[D][09171.865663] mod.client-node | [   remote-node.c:  865 client_node_set_activation()] node 0x60d8386b47c0: add link 0x735330004250: memid:10 fd:36 id:80 state:0x73535e42d008 pending:0/0
+[D][09171.865669] mod.client-node | [   remote-node.c:  841 client_node_set_activation()] node 0x60d8386b47c0: our activation 83: 4294967295 (nil) 0 0
+[D][09171.865675] mod.client-node | [   remote-node.c:  876 client_node_set_activation()] node 0x60d8386b47c0: remove link 0x7353300022c0: id:83 state:0x73535e42f008 pending:0/0
+[D][09171.865680] mod.client-node | [   remote-node.c:  112 clear_link()] link 0x7353300022c0
+[D][09171.865690] pw.mem       | [           mem.c:  457 pw_memmap_free()] 0x60d8386a05a0: map:0x735330002270 block:0x735330001d20 fd:9 ptr:0x73535e42f000 mapping:0x735330001f40 ref:3
+[D][09171.865697] spa.system   | [        system.c:   68 impl_close()] 0x60d8386865f8: close fd:26
+[D][09171.865702] pw.core      | [          core.c:   81 core_event_add_mem()] 0x60d83869f9e0: add mem 11 type:2 fd:37 flags:3
+[D][09171.865708] pw.mem       | [           mem.c:  641 pw_mempool_import()] 0x60d8386a05a0: block:0x735330004340 id:11 flags:00000003 type:2 fd:37
+[D][09171.865713] mod.client-node | [   remote-node.c:  169 find_mix()] port 0x60d8386b5230: found mix 0:0.0
+[D][09171.865718] pw.mem       | [           mem.c:  881 pw_mempool_find_tag()] 0x60d8386a05a0: find tag 83:0:0:0:1 size:20
+[D][09171.865724] pw.mem       | [           mem.c:  377 pw_memblock_map()] 0x60d8386a05a0: block 0x735330004340[11] mapping 0+8 of file=37/1:23656 with size=4096
+[D][09171.865733] pw.mem       | [           mem.c:  326 memblock_map()] 0x60d8386a05a0: block:0x735330004340 fd:37 map:0x7353300043f0 ptr:0x73535e283000 (0 4096) block-ref:2
+[D][09171.865739] pw.mem       | [           mem.c:  412 pw_memblock_map()] 0x60d8386a05a0: map:0x735330004430 block:0x735330004340 fd:37 ptr:0x73535e283000 (0 8) mapping:0x7353300043f0 ref:1
+[D][09171.865745] pw.mem       | [           mem.c:  417 pw_memblock_map()] 0x60d8386a05a0: tag:83:0:0:0:1
+[D][09171.865749] mod.client-node | [   remote-node.c:  781 client_node_port_set_io()] port 0x60d8386b5230: set io:Spa:Enum:IO:Buffers new:0x73535e283000 old:(nil)
+[D][09171.865758] mod.client-node | [   remote-node.c:  465 client_node_command()] 0x60d8386b8ad0: got command 2 (Spa:Pod:Object:Command:Node:Start)
+[D][09171.865763] pw.node      | [     impl-node.c: 2390 pw_impl_node_set_state()] 0x60d8386b47c0: set state (creating) creating -> running, active 1 pause_on_idle:1
+[D][09171.865769] pw.node      | [     impl-node.c:  248 node_activate()] 0x60d8386b47c0: activate
+[D][09171.865774] pw.node      | [     impl-node.c:  271 start_node()] 0x60d8386b47c0: start node driving:0 driver:0 added:0
+[I][09171.865788] pw.stream    | [        stream.c:  698 impl_send_command()] 0x60d8386b2a80: command Spa:Pod:Object:Command:Node:Start
+[D][09171.865794] pw.stream    | [        stream.c:  715 impl_send_command()] 0x60d8386b2a80: start 0
+[D][09171.865799] pw.stream    | [        stream.c:  399 stream_set_state()] 0x60d8386b2a80: update state from paused -> streaming (0) (null)
+🌊 [PipeWire] Stream state changed: PAUSED -> STREAMING
+[D][09171.865812] pw.work-queue | [    work-queue.c:  179 pw_work_queue_add()] 0x60d838685fe0: defer object 0x60d8386b47c0 id:1
+[D][09171.865817] mod.protocol-native | [    connection.c:  278 clear_buffer()] 0x60d8386a0750 clear fds:0 n_fds:3
+[D][09171.865823] pw.core      | [          core.c:   26 core_event_ping()] 0x60d83869f9e0: object 2 ping 1073742033
+[D][09171.865832] pw.work-queue | [    work-queue.c:   64 process_work_queue()] 0x60d838685fe0: n_queued:0 process work item 0x60d8386b47c0 seq:-1 res:0 id:1
+[D][09171.865839] pw.node      | [     impl-node.c: 2359 on_state_complete()] 0x60d8386b47c0: state complete res:0 seq:1
+[D][09171.865843] pw.node      | [     impl-node.c:  371 node_update_state()] 0x60d8386b47c0: start node driving:0 driver:0 added:0
+[D][09171.865861] pw.node      | [     impl-node.c:  402 node_update_state()] 0x60d8386b47c0: (core-engine) creating -> running ((null))
+[I][09171.865868] pw.node      | [     impl-node.c:  412 node_update_state()] (core-engine-83) creating -> running
+[D][09171.865873] mod.client-node | [   remote-node.c: 1023 node_info_changed()] info changed 0x60d8386b8b48
+📩 [WebRtcManager] Received message: {"target": "host", "type": 4, "sender": "client"}
+🤝 [WebRtcManager] Client requested connection! Generating Offer...
+2026-07-13 14:24:44.323 INFO  [343981] [rtc::impl::IceTransport::IceTransport@110] Using STUN server "stun.l.google.com:19302"
+2026-07-13 14:24:44.323 INFO  [343981] [rtc::impl::PeerConnection::changeSignalingState@1395] Changed signaling state to have-local-offer
+2026-07-13 14:24:44.324 INFO  [343981] [rtc::impl::PeerConnection::changeGatheringState@1382] Changed gathering state to in-progress
+2026-07-13 14:24:44.324 INFO  [343981] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1253: Changing state to gathering
+2026-07-13 14:24:44.324 INFO  [343981] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1253: Changing state to connecting
+2026-07-13 14:24:44.324 INFO  [343981] [rtc::impl::PeerConnection::changeIceState@1364] Changed ICE state to checking
+🧊 [WebRtcManager] Found ICE Candidate, sending to signaling server...
+2026-07-13 14:24:44.324 INFO  [343981] [rtc::impl::PeerConnection::changeState@1346] Changed state to connecting
+🧊 [WebRtcManager] Found ICE Candidate, sending to signaling server...
+🧊 [WebRtcManager] Found ICE Candidate, sending to signaling server...
+📩 [WebRtcManager] Received message: {"sdp": "v=0\r\no=rtc 1479086676 0 IN IP4 127.0.0.1\r\ns=-\r\nt=0 0\r\na=group:BUNDLE video 0\r\na=group:LS video\r\na=msid-semantic:WMS *\r\na=ice-options:ice2,trickle\r\na=fingerprint:sha-256 BA:D2:AB:71:6F:F6:EE:12:1D:C8:FB:23:01:B1:10:43:BC:69:0F:33:8D:AB:17:A9:75:0D:1D:2B:E7:78:DE:F1\r\nm=video 9 UDP/TLS/RTP/SAVPF 96\r\nc=IN IP4 0.0.0.0\r\na=mid:video\r\na=recvonly\r\na=rtcp-mux\r\na=rtpmap:96 H264/90000\r\na=rtcp-fb:96 nack\r\na=rtcp-fb:96 nack pli\r\na=rtcp-fb:96 goog-remb\r\na=fmtp:96 profile-level-id=42e01f;packetization-mode=1;level-asymmetry-allowed=1\r\na=setup:active\r\na=ice-ufrag:Awoa\r\na=ice-pwd:PgmdUhkWrQGb49HcrZm+88\r\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\r\nc=IN IP4 0.0.0.0\r\na=mid:0\r\na=sendrecv\r\na=sctp-port:5000\r\na=max-message-size:262144\r\na=setup:active\r\na=ice-ufrag:Awoa\r\na=ice-pwd:PgmdUhkWrQGb49HcrZm+88\r\n", "target": "host", "type": 2, "sender": "client"}
+🤝 [WebRtcManager] Received Answer from Client!
+2026-07-13 14:24:44.326 INFO  [343981] [rtc::impl::PeerConnection::changeSignalingState@1395] Changed signaling state to stable
+📩 [WebRtcManager] Received message: {"candidate": "candidate:1 1 UDP 2114977791 177.71.117.82 41292 typ host", "sdpMid": "video", "target": "host", "type": 3, "sender": "client"}
+🧊 [WebRtcManager] Received ICE Candidate from Client
+📩 [WebRtcManager] Received message: {"candidate": "candidate:2 1 UDP 2114977535 172.18.0.1 41292 typ host", "sdpMid": "video", "target": "host", "type": 3, "sender": "client"}
+🧊 [WebRtcManager] Received ICE Candidate from Client
+📩 [WebRtcManager] Received message: {"candidate": "candidate:3 1 UDP 2114977279 172.19.0.1 41292 typ host", "sdpMid": "video", "target": "host", "type": 3, "sender": "client"}
+🧊 [WebRtcManager] Received ICE Candidate from Client
+2026-07-13 14:24:44.396 INFO  [344257] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:470: Using STUN server stun.l.google.com:19302
+📩 [WebRtcManager] Received message: {"candidate": "candidate:5 1 UDP 1678769151 177.71.117.82 41292 typ srflx raddr 0.0.0.0 rport 0", "sdpMid": "video", "target": "host", "type": 3, "sender": "client"}
+🧊 [WebRtcManager] Received ICE Candidate from Client
+2026-07-13 14:24:44.541 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1530: STUN server binding successful
+2026-07-13 14:24:44.541 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1549: Got STUN mapped address 177.71.117.82:60796 from server
+🧊 [WebRtcManager] Found ICE Candidate, sending to signaling server...
+2026-07-13 14:24:44.576 WARN  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: conn_poll.c:649: Send failed, errno=101
+2026-07-13 14:24:44.576 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1786: STUN binding failed: Network unreachable
+2026-07-13 14:24:44.576 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:987: STUN server binding failed
+2026-07-13 14:24:44.576 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:2618: Candidate gathering done
+2026-07-13 14:24:44.576 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:2602: Connectivity timer started
+2026-07-13 14:24:44.576 INFO  [344256] [rtc::impl::PeerConnection::changeGatheringState@1382] Changed gathering state to complete
+2026-07-13 14:24:44.626 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1253: Changing state to connected
+2026-07-13 14:24:44.626 INFO  [344256] [rtc::impl::PeerConnection::changeIceState@1364] Changed ICE state to connected
+2026-07-13 14:24:44.627 INFO  [344256] [rtc::impl::PeerConnection::initDtlsTransport@276] This connection requires media support
+2026-07-13 14:24:44.627 INFO  [344256] [rtc::impl::IceTransport::LogCallback@391] juice: agent.c:1253: Changing state to completed
+2026-07-13 14:24:44.627 INFO  [344256] [rtc::impl::PeerConnection::changeIceState@1364] Changed ICE state to completed
+2026-07-13 14:24:44.629 INFO  [343974] [rtc::impl::DtlsTransport::doRecv@969] DTLS handshake finished
+2026-07-13 14:24:44.629 INFO  [343974] [rtc::impl::DtlsSrtpTransport::postHandshake@298] Deriving SRTP keying material (OpenSSL)
+2026-07-13 14:24:44.630 INFO  [343973] [rtc::impl::SctpTransport::processNotification@872] SCTP connected
+2026-07-13 14:24:44.630 INFO  [343973] [rtc::impl::PeerConnection::changeState@1346] Changed state to connected
+✅ [WebRtcManager] Input DataChannel Opened!
+2026-07-13 14:24:48.136 INFO  [343978] [rtc::impl::SctpTransport::processNotification@876] SCTP disconnected
+2026-07-13 14:24:48.136 INFO  [343978] [rtc::impl::PeerConnection::changeState@1346] Changed state to disconnected
+2026-07-13 14:24:48.136 INFO  [343977] [rtc::impl::PeerConnection::changeIceState@1364] Changed ICE state to closed
+2026-07-13 14:24:48.136 INFO  [343977] [rtc::impl::PeerConnection::changeState@1346] Changed state to closed

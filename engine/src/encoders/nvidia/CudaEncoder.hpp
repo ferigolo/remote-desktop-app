@@ -15,9 +15,9 @@ class CudaEncoder : public BaseEncoder {
                   int bitrate = 50000000) override;
 
  private:
-  AVBufferRef* deviceCtx;
-  SwsContext* swsCtx = nullptr;
-  AVFrame* nv12CpuFrame = nullptr;
+  AVBufferRef* deviceCtx{};
+  SwsContext* swsCtx{};
+  AVFrame* nv12CpuFrame{};
 
   AVFrame* createDrmFrame(int fd, int width, int height, int stride,
                           uint64_t modifier, uint32_t spaFormat);
@@ -25,7 +25,6 @@ class CudaEncoder : public BaseEncoder {
               uint32_t spaFormat) override;
   void encode(int fd, int width, int height, int stride,
               uint32_t spaFormat) override;
-  void processPacket(const AVFrame* frame) override;
-  void flush() override;
+
   void cleanup() override;
 };

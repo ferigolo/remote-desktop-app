@@ -49,8 +49,7 @@ void SoftwareDecoder::decode(const uint8_t* data, size_t size) {
   pkt->data = (uint8_t*)data;
   pkt->size = size;
 
-  int ret = avcodec_send_packet(codecCtx, pkt);
-  if (ret < 0) {
+  if (int ret = avcodec_send_packet(codecCtx, pkt); ret < 0) {
     if (hasDecodedFirstFrame) {
       char errbuf[128];
       av_strerror(ret, errbuf, sizeof(errbuf));

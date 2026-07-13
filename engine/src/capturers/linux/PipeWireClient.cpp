@@ -135,10 +135,18 @@ void PipeWireClient::onCoreError(void* /*data*/, uint32_t id, int /*seq*/,
 void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
                                           pw_stream_state state,
                                           const char* error) {
-  static const char* state_names[] = {"ERROR", "UNCONNECTED", "CONNECTING",
-                                      "PAUSED", "STREAMING"};
+  auto getStateName = [](pw_stream_state s) -> const char* {
+    switch (s) {
+      case PW_STREAM_STATE_ERROR: return "ERROR";
+      case PW_STREAM_STATE_UNCONNECTED: return "UNCONNECTED";
+      case PW_STREAM_STATE_CONNECTING: return "CONNECTING";
+      case PW_STREAM_STATE_PAUSED: return "PAUSED";
+      case PW_STREAM_STATE_STREAMING: return "STREAMING";
+      default: return "UNKNOWN";
+    }
+  };
   std::println("🌊 [PipeWire] Stream state changed: {} -> {}",
-               state_names[old_state], state_names[state]);
+               getStateName(old_state), getStateName(state));
 
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
 
@@ -159,8 +167,7 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
   if (param == nullptr || id != SPA_PARAM_Format) return;
 
   struct spa_video_info_raw info;
-
-  if (int ret = spa_format_video_raw_parse(param, &info) < 0) {
+  if (int ret = spa_format_video_raw_parse(param, &info); ret < 0) {
     std::println("[PipeWireClient] Error parsing video format. Code: {}", ret);
     return;
   }
@@ -196,6 +203,10 @@ void PipeWireClient::onStreamProcess(void* data) {
   if (!b) return;
 
   struct spa_buffer* buf = b->buffer;
+  if (!buf || buf->n_datas == 0 || !buf->datas[0].chunk) {
+    pw_stream_queue_buffer(self->stream, b);
+    return;
+  }
   VideoFrame frame = {
       .type = FrameMemoryType::MemFd,
       .fd = dup(buf->datas[0].fd),

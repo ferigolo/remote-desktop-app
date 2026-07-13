@@ -12,6 +12,8 @@
 
 #ifdef HAVE_CUDA
 #include "encoders/nvidia/CudaEncoder.hpp"
+#elif defined(HAVE_INTEL_QSV)
+#include "encoders/intel/IntelIrisEncoder.hpp"
 #endif
 
 CoreEngine::CoreEngine()
@@ -26,9 +28,11 @@ bool CoreEngine::initialize() {
 
 #ifdef HAVE_CUDA
   encoder = std::make_unique<CudaEncoder>(nullptr);
+#elif defined(HAVE_INTEL_QSV)
+  encoder = std::make_unique<IntelIrisEncoder>(nullptr);
 #else
   std::println(stderr, "❌ [Core] No hardware encoder available on this system!");
-  // Throwing an exception or initializing a software encoder would go here
+  return false;
 #endif
 
   capturer = ScreenCapturer::create();
@@ -79,16 +83,4 @@ void CoreEngine::cleanup() {
   if (webRtcManager) webRtcManager.reset();
 
   std::println("🧹 [Core] Released all resources");
-}
-
-void CoreEngine::printRendererInfo() const {
-#ifndef NDEBUG
-  if (!renderer) return;
-
-  const char* backendName = SDL_GetRendererName(renderer);
-  std::println(" [Core] Using {} backend", backendName);
-
-  // Delegando o trabalho sujo e OS-specific para as Utils
-  PlatformUtils::printGPUName(renderer, backendName);
-#endif
 }

@@ -22,33 +22,18 @@ class BaseEncoder {
   const AVCodec* codec{};
   AVCodecContext* codecCtx{};
 
-  virtual void processPacket(const AVFrame* frame) = 0;
-  virtual void flush() = 0;
+  virtual void processPacket(const AVFrame* frame);
+  virtual void flush();
   virtual void cleanup() = 0;
 
-  bool printAvErrorAndReturn(std::string_view contextMessage) {
-    std::println(std::cerr, "❌ [Decoder] {} ", contextMessage);
-    return false;
-  }
-  bool printAvErrorAndReturn(int ret, std::string_view contextMessage) {
-    if (ret < 0) {
-      char errbuf[AV_ERROR_MAX_STRING_SIZE];
-      // Translate the error code to a readable string
-      if (av_strerror(ret, errbuf, sizeof(errbuf)) < 0)
-        snprintf(errbuf, sizeof(errbuf), "Unknown error");
-
-      std::println(std::cerr, "❌ [Decoder] {} | FFmpeg error: {} (Code: {})",
-                   contextMessage, errbuf, ret);
-    }
-    return false;
-  }
+  virtual bool printAvErrorAndReturn(std::string_view contextMessage);
+  virtual bool printAvErrorAndReturn(int ret, std::string_view contextMessage);
 
  public:
   BaseEncoder() = default;
-  BaseEncoder(std::function<void(AVPacket* pkt)> onEncodedPacketCallback)
-      : onEncodedPacketCallback(std::move(onEncodedPacketCallback)) {}
+  BaseEncoder(std::function<void(AVPacket* pkt)> onEncodedPacketCallback);
 
-  virtual ~BaseEncoder() {}
+  virtual ~BaseEncoder() = default;
 
   std::function<void(AVPacket* pkt)> onEncodedPacketCallback;
 
