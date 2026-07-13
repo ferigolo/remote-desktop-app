@@ -133,18 +133,12 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
                                           const char* error) {
   constexpr auto state_name = [](pw_stream_state s) {
     switch (s) {
-      case PW_STREAM_STATE_ERROR:
-        return "ERROR";
-      case PW_STREAM_STATE_UNCONNECTED:
-        return "UNCONNECTED";
-      case PW_STREAM_STATE_CONNECTING:
-        return "CONNECTING";
-      case PW_STREAM_STATE_PAUSED:
-        return "PAUSED";
-      case PW_STREAM_STATE_STREAMING:
-        return "STREAMING";
-      default:
-        return "UNKNOWN";
+      case PW_STREAM_STATE_ERROR: return "ERROR";
+      case PW_STREAM_STATE_UNCONNECTED: return "UNCONNECTED";
+      case PW_STREAM_STATE_CONNECTING: return "CONNECTING";
+      case PW_STREAM_STATE_PAUSED: return "PAUSED";
+      case PW_STREAM_STATE_STREAMING: return "STREAMING";
+      default: return "UNKNOWN";
     }
   };
   std::println("🌊 [PipeWire] Stream state changed: {} -> {}",
@@ -164,10 +158,7 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
 void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                                           const spa_pod* param) {
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
-  std::println(
-      "🔍 [PipeWireClient] onStreamParamChanged called with id: {}, param is "
-      "null: {}",
-      id, param == nullptr);
+  std::println("🔍 [PipeWireClient] onStreamParamChanged called with id: {}, param is null: {}", id, param == nullptr);
 
   if (param == nullptr || id != SPA_PARAM_Format) return;
 
@@ -184,9 +175,7 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                   ? info.framerate.num / info.framerate.denom
                   : 144;
   self->drmModifier = info.modifier;
-  std::println(
-      "🔍 [PipeWireClient] Negotiated format: {}x{} at {}fps, modifier: {}",
-      self->width, self->height, self->fps, self->drmModifier);
+  std::println("🔍 [PipeWireClient] Negotiated format: {}x{} at {}fps, modifier: {}", self->width, self->height, self->fps, self->drmModifier);
 
   uint8_t buffer[1024];
   spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
@@ -245,9 +234,8 @@ void PipeWireClient::onStreamProcess(void* data) {
       frame.size = buf->datas[0].chunk->size;
       break;
     default:
-      std::println("⚠️ [PipeWireClient] Unknown frame memory type: {}",
-                   buf->datas[0].type);
-      frame.type = FrameMemoryType::MemFd;  // fallback
+      std::println("⚠️ [PipeWireClient] Unknown frame memory type: {}", buf->datas[0].type);
+      frame.type = FrameMemoryType::MemFd; // fallback
       break;
   }
 
@@ -255,28 +243,19 @@ void PipeWireClient::onStreamProcess(void* data) {
     static int frameCount = 0;
     frameCount++;
     if (frameCount == 1 || frameCount % frame.fps == 0) {
-      std::println(
-          "🔍 [PipeWireClient] (Frame {}) Captured DmaBuf frame and sending to "
-          "BaseEncoder...",
-          frameCount);
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured DmaBuf frame and sending to BaseEncoder...", frameCount);
     }
   } else if (frame.type == FrameMemoryType::MemFd) {
     static int frameCountMemFd = 0;
     frameCountMemFd++;
     if (frameCountMemFd == 1 || frameCountMemFd % frame.fps == 0) {
-      std::println(
-          "🔍 [PipeWireClient] (Frame {}) Captured MemFd frame and sending to "
-          "BaseEncoder...",
-          frameCountMemFd);
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemFd frame and sending to BaseEncoder...", frameCountMemFd);
     }
   } else if (frame.type == FrameMemoryType::MemPtr) {
     static int frameCountMemPtr = 0;
     frameCountMemPtr++;
     if (frameCountMemPtr == 1 || frameCountMemPtr % frame.fps == 0) {
-      std::println(
-          "🔍 [PipeWireClient] (Frame {}) Captured MemPtr frame and sending to "
-          "BaseEncoder...",
-          frameCountMemPtr);
+      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemPtr frame and sending to BaseEncoder...", frameCountMemPtr);
     }
   }
 

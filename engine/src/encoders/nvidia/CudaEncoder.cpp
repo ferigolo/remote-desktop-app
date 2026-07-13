@@ -4,13 +4,7 @@ CudaEncoder::CudaEncoder(
     std::function<void(AVPacket* pkt)> onEncodedPacketCallback)
     : BaseEncoder(onEncodedPacketCallback) {}
 
-CudaEncoder::~CudaEncoder() {
-  if (codecCtx) {
-    std::println("[CudaEncoder] Flushing remaining frames...");
-    flush();
-  }
-  cleanup();
-}
+CudaEncoder::~CudaEncoder() { cleanup(); }
 
 bool CudaEncoder::initialize(int width, int height, int fps, int bitrate) {
   if (av_hwdevice_ctx_create(&deviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr,
@@ -167,6 +161,7 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
 }
 
 void CudaEncoder::cleanup() {
+  flush();
   if (swsCtx) {
     sws_freeContext(swsCtx);
     swsCtx = nullptr;
