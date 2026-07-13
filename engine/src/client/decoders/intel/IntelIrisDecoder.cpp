@@ -23,17 +23,17 @@ bool IntelIrisDecoder::initialize() {
   codecCtx->thread_count = 1;  // Optional but recommended for low latency
 
   // Initialize the Intel QSV Hardware Context
-  if (int ret =
-          av_hwdevice_ctx_create(
-              &deviceCtx, AV_HWDEVICE_TYPE_QSV,
-              "/dev/dri/renderD128",  // Explicitly point to the Intel iGPU node
-              nullptr, 0) < 0)
+  if (int ret = av_hwdevice_ctx_create(
+          &deviceCtx, AV_HWDEVICE_TYPE_QSV,
+          "/dev/dri/renderD128",  // Explicitly point to the Intel iGPU node
+          nullptr, 0);
+      ret < 0)
     return printAvErrorAndReturn(ret,
                                  "Failed to create Intel QSV hardware context. "
                                  "Check Intel Media drivers.");
   // Attach hardware context to the decoder
   codecCtx->hw_device_ctx = av_buffer_ref(deviceCtx);
-  if (int ret = avcodec_open2(codecCtx, codec, nullptr) < 0)
+  if (int ret = avcodec_open2(codecCtx, codec, nullptr); ret < 0)
     return printAvErrorAndReturn(ret, "Failed to open QSV H264 decoder.");
 
   hwFrame = av_frame_alloc();
@@ -56,7 +56,7 @@ void IntelIrisDecoder::decode(const uint8_t* data, size_t size) {
   pkt->data = (uint8_t*)data;
   pkt->size = size;
 
-  if (int ret = avcodec_send_packet(codecCtx, pkt) < 0)
+  if (int ret = avcodec_send_packet(codecCtx, pkt); ret < 0) {
     if (hasDecodedFirstFrame) {
       char errbuf[128];
       av_strerror(ret, errbuf, sizeof(errbuf));
@@ -86,14 +86,14 @@ void IntelIrisDecoder::decode(const uint8_t* data, size_t size) {
         AVFrame* drmFrame = av_frame_alloc();
         drmFrame->format = AV_PIX_FMT_DRM_PRIME;
 
-        if (av_hwframe_map(drmFrame, hwFrame, AV_HWFRAME_MAP_READ) == 0) {
-          AVDRMFrameDescriptor* desc = (AVDRMFrameDescriptor*)drmFrame->data[0];
-          // You now have the raw File Descriptor (FD) pointing to the VRAM!
-          int dma_buf_fd = desc->objects[0].fd;
-          int pitch = desc->layers[0].planes[0].pitch;
+        if (int ret = av_hwframe_map(drmFrame, hwFrame, AV_HWFRAME_MAP_READ);
+            ret < 0) {
+          printAvErrorAndReturn(ret, "Failed mapping hwFrame into drmFrame");
+          continue;
         }
+        // You now have the raw File Descriptor (FD) pointing to the VRAM!
 
-        if (int ret = av_hwframe_transfer_data(swFrame, hwFrame, 0) < 0) {
+        if (int ret = av_hwframe_transfer_data(swFrame, hwFrame, 0); ret < 0) {
           printAvErrorAndReturn(ret, "Error transfering data from VRAM to RAM");
           continue;
         }
@@ -105,13 +105,14 @@ void IntelIrisDecoder::decode(const uint8_t* data, size_t size) {
               "NV12",
               frameCount, swFrame->width, swFrame->height);
 
-        // Trigger the callback with separated Y and UV planes directly
-        // sw_frame->data[0] is the Y (Luma) plane
-        // sw_frame->data[1] is the UV (Chroma) plane
-        if (onFrameDecoded)
-          onFrameDecoded(swFrame->data[0], swFrame->linesize[0],
-                         swFrame->data[1], swFrame->linesize[1], swFrame->width,
-                         swFrame->height);
+        if (onFrameDecoded) onFrameDecoded(swFrame);
       }
+  }
   av_packet_free(&pkt);
+}
+
+void IntelIrisDecoder::updateTexture(SDL_Renderer* renderer,
+                                     SDL_Texture** texture) {
+  (void)renderer;
+  (void)texture;
 }

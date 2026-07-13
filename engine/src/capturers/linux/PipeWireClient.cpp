@@ -231,8 +231,7 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
   if (param == nullptr || id != SPA_PARAM_Format) return;
 
   struct spa_video_info_raw info;
-
-  if (int ret = spa_format_video_raw_parse(param, &info) < 0) {
+  if (int ret = spa_format_video_raw_parse(param, &info); ret < 0) {
     std::println("[PipeWireClient] Error parsing video format. Code: {}", ret);
     return;
   }
@@ -276,6 +275,10 @@ void PipeWireClient::onStreamProcess(void* data) {
   if (!b) return;
 
   struct spa_buffer* buf = b->buffer;
+  if (!buf || buf->n_datas == 0 || !buf->datas[0].chunk) {
+    pw_stream_queue_buffer(self->stream, b);
+    return;
+  }
   VideoFrame frame = {
       .type = FrameMemoryType::MemFd,
       .fd = dup(buf->datas[0].fd),

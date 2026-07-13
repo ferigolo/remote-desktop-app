@@ -1,5 +1,7 @@
 #include "Renderer.hpp"
 
+#include <SDL3/SDL.h>
+
 #include <cstdio>
 #include <print>
 
@@ -14,11 +16,22 @@ Renderer::~Renderer() {
   if (texture) SDL_DestroyTexture(texture);
   if (sdlRenderer) SDL_DestroyRenderer(sdlRenderer);
   if (window) SDL_DestroyWindow(window);
+  SDL_Quit();
 }
 
 bool Renderer::initialize() {
+  SDL_Init(SDL_INIT_VIDEO);
+  SDL_DisplayID displayID = SDL_GetPrimaryDisplay();
+  int width = 1920;
+  int height = 1080;
+  const SDL_DisplayMode* mode = SDL_GetCurrentDisplayMode(displayID);
+  if (mode) {
+    width = mode->w;
+    height = mode->h;
+    std::println("Monitor Size: {}x{}", width, height);
+  }
   window =
-      SDL_CreateWindow("Remote Desktop Client - Native", 1920, 1080,
+      SDL_CreateWindow("Remote Desktop Client - Native", width, height,
                        SDL_WINDOW_RESIZABLE | SDL_WINDOW_HIGH_PIXEL_DENSITY |
                            SDL_WINDOW_INPUT_FOCUS);
   if (!window) return false;
@@ -31,8 +44,7 @@ bool Renderer::initialize() {
     sdlRenderer = SDL_CreateRenderer(window, nullptr);
   }
 
-  int hostWidth = 1920, hostHeight = 1080;
-  if (!SDL_SetRenderLogicalPresentation(sdlRenderer, hostWidth, hostHeight,
+  if (!SDL_SetRenderLogicalPresentation(sdlRenderer, width, height,
                                         SDL_LOGICAL_PRESENTATION_LETTERBOX))
     std::println(stderr, "Warning: Letterboxing failed: {}", SDL_GetError());
 
@@ -47,6 +59,10 @@ void Renderer::setFrame(AVFrame* newFrame) {
   // frames
   frame = av_frame_clone(newFrame);
   frameReady = true;
+}
+
+void Renderer::setHostResolution(int width, int height) {
+  hostResolution = std::make_tuple(width, height);
 }
 
 void Renderer::renderFrame() {

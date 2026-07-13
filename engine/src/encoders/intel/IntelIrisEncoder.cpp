@@ -20,7 +20,8 @@ bool IntelIrisEncoder::initialize(int width, int height, int fps, int bitrate) {
   codecCtx->pix_fmt = AV_PIX_FMT_QSV;
 
   if (int ret = av_hwdevice_ctx_create(&hwCtx, AV_HWDEVICE_TYPE_QSV, "auto",
-                                       nullptr, 0) < 0)
+                                       nullptr, 0);
+      ret < 0)
     return printAvErrorAndReturn(ret,
                                  "Failed to create hardware device context");
 
@@ -39,13 +40,13 @@ bool IntelIrisEncoder::initialize(int width, int height, int fps, int bitrate) {
   // Number of frames to pre-allocate in VRAM
   framesCtx->initial_pool_size = 32;
 
-  if (int ret = av_hwframe_ctx_init(hwFramesRef) < 0)
+  if (int ret = av_hwframe_ctx_init(hwFramesRef); ret < 0)
     return printAvErrorAndReturn(ret, "Failed initializing frames context");
 
   codecCtx->hw_frames_ctx = av_buffer_ref(hwFramesRef);
 
-  // Now that encoder knows where its hardware memory pool is, we can open it
-  if (int ret = avcodec_open2(codecCtx, codec, nullptr) < 0)
+  // Now encoder knows where its hardware memory pool is, we can open it
+  if (int ret = avcodec_open2(codecCtx, codec, nullptr); ret < 0)
     return printAvErrorAndReturn(ret, "Failed to open the encoder");
 
   isInitialized = true;
@@ -96,19 +97,20 @@ void IntelIrisEncoder::encode(int fd, int width, int height, int stride,
   // Wrap the DMABUF in a DRM hardware frame
   AVFrame* drmFrame =
       createDrmFrame(fd, width, height, stride, modifier, spaFormat);
-  // Map DRM -> CUDA (Zero-Copy)
+  // Map DRM -> QSV (Zero-Copy)
   AVFrame* frame = av_frame_alloc();
-  frame->format = AV_PIX_FMT_CUDA;
+  frame->format = AV_PIX_FMT_QSV;
+  frame->hw_frames_ctx = av_buffer_ref(hwFramesRef);
 
-  // Maps the DMA Buffer straight into NVENC
-  if (av_hwframe_map(frame, drmFrame, AV_HWFRAME_MAP_READ) < 0) {
-    printAvErrorAndReturn("Failed to map DRM frame to CUDA");
+  // Maps the DMA Buffer straight into QSV
+  if (int ret = av_hwframe_map(frame, drmFrame, AV_HWFRAME_MAP_READ); ret < 0) {
+    printAvErrorAndReturn(ret, "Failed to map DRM frame to QSV");
     av_frame_free(&drmFrame);
     av_frame_free(&frame);
     return;
   }
 
-  processPacket(frame);  // Send to NVENC
+  processPacket(frame);  // Send to QSV encoder
   av_frame_free(&drmFrame);
   av_frame_free(&frame);
 }
@@ -116,10 +118,12 @@ void IntelIrisEncoder::encode(int fd, int width, int height, int stride,
 void IntelIrisEncoder::encode(int fd, int width, int height, int stride,
                               uint32_t spaFormat) {}
 
-void IntelIrisEncoder::flush() {}
-
 void IntelIrisEncoder::cleanup() {
+  flush();
   if (hwFramesRef) av_buffer_unref(&hwFramesRef);
   if (hwCtx) av_buffer_unref(&hwCtx);
-  if (codecCtx) avcodec_free_context(&codecCtx);
+  if (codecCtx) {
+    avcodec_free_context(&codecCtx);
+  }
+  framesCtx = nullptr;
 }

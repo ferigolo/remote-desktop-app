@@ -27,7 +27,6 @@ class IntelIrisEncoder : public BaseEncoder {
 
   AVFrame* createDrmFrame(int fd, int width, int height, int stride,
                           uint64_t modifier, uint32_t spaFormat);
-
-  void flush() override;
+                          
   void cleanup() override;
 };

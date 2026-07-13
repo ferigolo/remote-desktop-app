@@ -4,24 +4,7 @@ CudaEncoder::CudaEncoder(
     std::function<void(AVPacket* pkt)> onEncodedPacketCallback)
     : BaseEncoder(onEncodedPacketCallback) {}
 
-CudaEncoder::~CudaEncoder() {
-  if (codecCtx) {
-    std::println("[CudaEncoder] Flushing remaining frames...");
-    processPacket(nullptr);
-
-    avcodec_free_context(&codecCtx);
-    codecCtx = nullptr;
-  }
-  if (deviceCtx) {
-    av_buffer_unref(&deviceCtx);
-    deviceCtx = nullptr;
-  }
-  if (swsCtx) {
-    sws_freeContext(swsCtx);
-    swsCtx = nullptr;
-  }
-  if (nv12CpuFrame) av_frame_free(&nv12CpuFrame);
-}
+CudaEncoder::~CudaEncoder() { cleanup(); }
 
 bool CudaEncoder::initialize(int width, int height, int fps, int bitrate) {
   if (av_hwdevice_ctx_create(&deviceCtx, AV_HWDEVICE_TYPE_CUDA, nullptr,
@@ -111,6 +94,7 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
   // Map DRM -> CUDA (Zero-Copy)
   AVFrame* cudaFrame = av_frame_alloc();
   cudaFrame->format = AV_PIX_FMT_CUDA;
+  cudaFrame->hw_frames_ctx = av_buffer_ref(codecCtx->hw_frames_ctx);
 
   // Maps the DMA Buffer straight into NVENC
   if (av_hwframe_map(cudaFrame, drmFrame, AV_HWFRAME_MAP_READ) < 0) {
@@ -175,10 +159,15 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
   close(fd);
 }
 
-void CudaEncoder::flush() {
-  if (!codecCtx) return;
-  std::println("[Encoder] Flushing remaining frames...");
-  avcodec_send_frame(codecCtx, nullptr);
+void CudaEncoder::cleanup() {
+  flush();
+  if (swsCtx) {
+    sws_freeContext(swsCtx);
+    swsCtx = nullptr;
+  }
+  if (deviceCtx) av_buffer_unref(&deviceCtx);
+  if (nv12CpuFrame) av_frame_free(&nv12CpuFrame);
+  if (codecCtx) {
+    avcodec_free_context(&codecCtx);
+  }
 }
-
-void CudaEncoder::cleanup() {}

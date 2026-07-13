@@ -20,13 +20,15 @@ class Renderer {
   bool initialize();
   void renderFrame();
   void setFrame(AVFrame* newFrame);
+  void setHostResolution(int width, int height);
 
  private:
-  AVFrame* frame = nullptr;
+  AVFrame* frame{};
   SDL_Renderer* sdlRenderer{};
   SDL_Window* window{};
   SDL_Texture* texture{};
 
+  std::tuple<int, int> hostResolution;
   int texWidth = 0;
   int texHeight = 0;
 

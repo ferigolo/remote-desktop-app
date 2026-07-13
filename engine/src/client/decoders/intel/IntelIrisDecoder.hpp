@@ -22,4 +22,6 @@ class IntelIrisDecoder : public BaseDecoder {
   
   AVFrame* hwFrame;
   AVFrame* swFrame;
+
+  void updateTexture(SDL_Renderer* renderer, SDL_Texture** texture) override;
 };

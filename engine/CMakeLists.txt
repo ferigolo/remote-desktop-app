@@ -49,6 +49,7 @@ set(SOURCE_FILES
     src/CoreEngine.cpp
     src/configurers/CoreEngineConfigurer.cpp
     src/network/WebRtcManager.cpp
+    src/encoders/BaseEncoder.cpp
     src/encoders/software/SoftwareEncoder.cpp
 )
 
