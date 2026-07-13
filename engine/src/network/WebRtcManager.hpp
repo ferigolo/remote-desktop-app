@@ -1,13 +1,12 @@
 #pragma once
-#include <rtc/rtc.hpp>
-#include <memory>
-#include <string>
-#include <print>
-#include <mutex>
 #include <condition_variable>
+#include <memory>
+#include <mutex>
+#include <print>
+#include <rtc/rtc.hpp>
+#include <string>
 
-enum class SignalingMessageType
-{
+enum class SignalingMessageType {
   Register,
   Offer,
   Answer,
@@ -15,9 +14,8 @@ enum class SignalingMessageType
   RequestOffer
 };
 
-class WebRtcManager
-{
-private:
+class WebRtcManager {
+ private:
   // libdatachannel's built-in WebSocket client
   std::shared_ptr<rtc::WebSocket> ws;
   std::shared_ptr<rtc::PeerConnection> pc;
@@ -31,19 +29,19 @@ private:
   bool isVideoTrackOpen = false;
   bool stopWaiting = false;
 
-  constexpr SignalingMessageType
-  parseMessageType(const std::string &typeStr);
+  constexpr SignalingMessageType parseMessageType(const std::string& typeStr);
 
-public:
+ public:
   WebRtcManager();
   ~WebRtcManager();
 
   void setVideoFps(uint32_t fps);
 
   // Connects to the Python Signaling Server
-  void connectSignaling(const std::string &url);
+  void connectSignaling(const std::string& url);
   void initializePeerConnection();
   void initializeDataChannel();
   void initializeVideoTrack();
-  void sendVideoPacket(const uint8_t *data, size_t size);
+  void sendVideoPacket(const uint8_t* data, size_t size);
+  void sendResolution(const int width, int height);
 };

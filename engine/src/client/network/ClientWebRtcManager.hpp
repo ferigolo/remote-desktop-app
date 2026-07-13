@@ -20,6 +20,7 @@ class ClientWebRtcManager {
   void connectSignaling(const std::string& url);
 
   std::function<void(const uint8_t* data, size_t size)> onVideoPacketReceived;
+  std::function<void(int width, int height)> onResolutionSetCallback;
 
  private:
   void initializePeerConnection();
@@ -27,4 +28,5 @@ class ClientWebRtcManager {
   std::shared_ptr<rtc::PeerConnection> pc;
   std::shared_ptr<rtc::WebSocket> ws;
   std::shared_ptr<rtc::Track> videoTrack;
+  std::shared_ptr<rtc::DataChannel> dataChannel;
 };

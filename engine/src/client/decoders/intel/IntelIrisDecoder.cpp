@@ -105,14 +105,14 @@ void IntelIrisDecoder::decode(const uint8_t* data, size_t size) {
               "NV12",
               frameCount, swFrame->width, swFrame->height);
 
-        // Trigger the callback with separated Y and UV planes directly
-        // sw_frame->data[0] is the Y (Luma) plane
-        // sw_frame->data[1] is the UV (Chroma) plane
-        if (onFrameDecoded)
-          onFrameDecoded(swFrame->data[0], swFrame->linesize[0],
-                         swFrame->data[1], swFrame->linesize[1], swFrame->width,
-                         swFrame->height);
+        if (onFrameDecoded) onFrameDecoded(swFrame);
       }
   }
   av_packet_free(&pkt);
+}
+
+void IntelIrisDecoder::updateTexture(SDL_Renderer* renderer,
+                                     SDL_Texture** texture) {
+  (void)renderer;
+  (void)texture;
 }

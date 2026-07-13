@@ -29,10 +29,10 @@ bool CoreEngine::initialize() {
 #elif defined(HAVE_INTEL_QSV)
   encoder = std::make_unique<IntelIrisEncoder>(nullptr);
 #else
-  std::println(stderr, "❌ [Core] No hardware encoder available on this system!");
+  std::println(stderr,
+               "❌ [Core] No hardware encoder available on this system!");
   return false;
 #endif
-
   capturer = ScreenCapturer::create();
   capturer->start(
       [this](const VideoFrame& frame) { handleIncomingFrame(frame); });
@@ -45,7 +45,10 @@ bool CoreEngine::initialize() {
 
 void CoreEngine::handleIncomingFrame(const VideoFrame& frame) {
   if (!encoder->IsInitialized()) {
-    if (webRtcManager) webRtcManager->setVideoFps(frame.fps);
+    if (webRtcManager) {
+      webRtcManager->setVideoFps(frame.fps);
+      webRtcManager->sendResolution(frame.width, frame.height);
+    }
 
     encoder->initialize(frame.width, frame.height, frame.fps);
     encoder->onEncodedPacketCallback = [this](AVPacket* p) {

@@ -29,5 +29,6 @@ class CoreEngine {
 
   void renderLoop();
   void cleanup();
+  void printRendererInfo() const;
   void handleIncomingFrame(const VideoFrame& frame);
 };

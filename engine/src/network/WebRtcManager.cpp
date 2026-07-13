@@ -59,8 +59,10 @@ void WebRtcManager::initializePeerConnection() {
 void WebRtcManager::initializeDataChannel() {
   if (!pc) throw std::runtime_error("Peer connection not initialized");
   dataChannel = pc->createDataChannel("input");
+
   dataChannel->onOpen(
       []() { std::println("✅ [WebRtcManager] Input DataChannel Opened!"); });
+
   dataChannel->onMessage([](std::variant<rtc::binary, rtc::string> data) {
     if (std::holds_alternative<rtc::binary>(data)) {
       // TODO: receive binary packets from client and pass them than through
@@ -141,6 +143,15 @@ void WebRtcManager::sendVideoPacket(const uint8_t* data, size_t size) {
     std::println(
         "❌ [WebRtcManager] Failed to send packet data (track->send returned "
         "false)");
+}
+
+void WebRtcManager::sendResolution(const int width, const int height) {
+  if (!(dataChannel && dataChannel->isOpen())) return;
+  json msg;
+  msg["type"] = "resolution";
+  msg["width"] = width;
+  msg["height"] = height;
+  dataChannel->send(msg.dump());
 }
 
 void WebRtcManager::connectSignaling(const std::string& url) {

@@ -84,6 +84,32 @@ void ClientWebRtcManager::initializePeerConnection() {
       }
     });
   });
+
+  pc->onDataChannel([this](std::shared_ptr<rtc::DataChannel> dc) {
+    std::println("📡 [ClientWebRtcManager] DataChannel received from host!");
+    this->dataChannel = dc;
+
+    dc->onMessage([this](std::variant<rtc::binary, rtc::string> data) {
+      if (std::holds_alternative<rtc::string>(data)) {
+        std::string msg = std::get<rtc::string>(data);
+        try {
+          auto parsedJson = nlohmann::json::parse(msg);
+
+          // Check if this message is our resolution tuple
+          if (parsedJson.contains("type") &&
+              parsedJson["type"] == "resolution") {
+            int width = parsedJson["width"];
+            int height = parsedJson["height"];
+            std::println("🖥️ [Client] Got host resolution: {}x{}", width, height);
+            if (onResolutionSetCallback) onResolutionSetCallback(width, height);
+          }
+        } catch (const nlohmann::json::exception& e) {
+          std::println(stderr, "Failed to parse DataChannel message: {}",
+                       e.what());
+        }
+      }
+    });
+  });
 }
 
 void ClientWebRtcManager::connectSignaling(const std::string& url) {
