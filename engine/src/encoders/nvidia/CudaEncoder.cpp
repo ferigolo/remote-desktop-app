@@ -164,9 +164,8 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
     std::println(stderr, "❌ [CudaEncoder] Failed to allocate hardware frame");
     av_frame_free(&hwFrame);
   } else {
-    if (av_hwframe_transfer_data(hwFrame, nv12CpuFrame, 0) < 0)
-      std::println(stderr,
-                   "❌ [CudaEncoder] Failed to upload NV12 frame to CUDA");
+    if (int ret =av_hwframe_transfer_data(hwFrame, nv12CpuFrame, 0); ret < 0)
+      printAvErrorAndReturn(ret, "Failed to upload NV12 frame to CUDA");
     else
       processPacket(hwFrame);
     av_frame_free(&hwFrame);

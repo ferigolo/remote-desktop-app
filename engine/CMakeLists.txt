@@ -58,8 +58,41 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         src/capturers/linux/PipeWireClient.cpp
         src/capturers/linux/ScreencastPortal.cpp
         src/utils/linux/PlatformUtils.cpp
+        src/utils/linux/OpenGlUtils.hpp
         src/capturers/LinuxCapturer.cpp
     )
+
+    # Find DRM (Required for formats)
+    find_package(PkgConfig REQUIRED)
+    pkg_check_modules(DRM REQUIRED libdrm)
+
+    # Make EGL, GBM, and Vulkan optional
+    pkg_check_modules(EGL QUIET egl)
+    pkg_check_modules(GBM QUIET gbm)
+    find_package(Vulkan QUIET)
+
+    set(LINUX_OPTIONAL_INCLUDE_DIRS "")
+    set(LINUX_OPTIONAL_LIBRARY_DIRS "")
+    set(LINUX_OPTIONAL_LIBRARIES "")
+
+    if(EGL_FOUND AND GBM_FOUND)
+        message(STATUS "🟢 EGL and GBM found! Enabling OpenGL support.")
+        add_compile_definitions(HAVE_EGL)
+        list(APPEND LINUX_OPTIONAL_INCLUDE_DIRS ${EGL_INCLUDE_DIRS} ${GBM_INCLUDE_DIRS})
+        list(APPEND LINUX_OPTIONAL_LIBRARY_DIRS ${EGL_LIBRARY_DIRS} ${GBM_LIBRARY_DIRS})
+        list(APPEND LINUX_OPTIONAL_LIBRARIES ${EGL_LIBRARIES} ${GBM_LIBRARIES})
+    else()
+        message(STATUS "⚪ EGL/GBM not found. OpenGL support disabled.")
+    endif()
+
+    if(Vulkan_FOUND)
+        message(STATUS "🟢 Vulkan found! Enabling Vulkan support.")
+        add_compile_definitions(HAVE_VULKAN)
+        list(APPEND LINUX_OPTIONAL_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
+        list(APPEND LINUX_OPTIONAL_LIBRARIES Vulkan::Vulkan)
+    else()
+        message(STATUS "⚪ Vulkan not found. Vulkan support disabled.")
+    endif()
 
     # Find the Qt6 package installed on the system via apt
     find_package(Qt6 COMPONENTS Core DBus REQUIRED)
@@ -68,8 +101,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     pkg_check_modules(PIPEWIRE REQUIRED libpipewire-0.3)
     pkg_check_modules(FFMPEG REQUIRED libavcodec libavutil libavfilter libswscale)
 
-    include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS})
-    link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS})
+    include_directories(${PIPEWIRE_INCLUDE_DIRS} ${FFMPEG_INCLUDE_DIRS} ${DRM_INCLUDE_DIRS} ${LINUX_OPTIONAL_INCLUDE_DIRS})
+    link_directories(${PIPEWIRE_LIBRARY_DIRS} ${FFMPEG_LIBRARY_DIRS} ${DRM_LIBRARY_DIRS} ${LINUX_OPTIONAL_LIBRARY_DIRS})
 
     add_compile_definitions(__linux__)
     
@@ -88,7 +121,12 @@ pkg_check_modules(LIBVA QUIET libva libva-drm libmfx) # Intel QSV / VAAPI Detect
 
 if(CUDAToolkit_FOUND)
     message(STATUS "🟢 CUDA Toolkit found: Enabling CUDA support...")
-    list(APPEND SOURCE_FILES src/encoders/nvidia/CudaEncoder.cpp)
+    set(CMAKE_CUDA_HOST_COMPILER "/usr/bin/g++-12")
+    set(CMAKE_CUDA_STANDARD 17)
+    set(CMAKE_CUDA_ARCHITECTURES 75)
+    set(CMAKE_CUDA_FLAGS "-arch=sm_75")
+    enable_language(CUDA)
+    list(APPEND SOURCE_FILES src/encoders/nvidia/CudaEncoder.cpp src/encoders/nvidia/CudaColorSpace.cu)
     list(APPEND EXTRA_CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp) # Added to Client
     add_compile_definitions(HAVE_CUDA)
 endif()
@@ -109,7 +147,7 @@ endif()
 # --- EXECUTABLE: CORE ENGINE ---
 add_executable(core-engine ${SOURCE_FILES}
     src/encoders/software/SoftwareEncoder.cpp)
-target_compile_options(core-engine PRIVATE -std=c++26 -O3 -Wall -Wextra)
+target_compile_options(core-engine PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=c++26> -O3 -Wall -Wextra)
 
 # Link libraries downloaded via Git (FetchContent)
 target_link_libraries(core-engine PRIVATE 
@@ -129,6 +167,8 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${FFMPEG_LIBRARIES} 
         Qt6::Core 
         Qt6::DBus
+        ${DRM_LIBRARIES}
+        ${LINUX_OPTIONAL_LIBRARIES}
     )
 elseif(APPLE)
     if(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|ARM64")
@@ -163,7 +203,7 @@ set(CLIENT_SOURCE_FILES
 )
 
 add_executable(native-client ${CLIENT_SOURCE_FILES})
-target_compile_options(native-client PRIVATE -std=c++26 -O3 -Wall -Wextra)
+target_compile_options(native-client PRIVATE $<$<COMPILE_LANGUAGE:CXX>:-std=c++26> -O3 -Wall -Wextra)
 
 target_link_libraries(native-client PRIVATE 
     SDL3::SDL3 
@@ -187,11 +227,11 @@ endif()
 if(CUDAToolkit_FOUND)
     # Core Engine Links
     target_include_directories(core-engine PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-    target_link_libraries(core-engine PRIVATE CUDA::cudart)
-    
+    target_link_libraries(core-engine PRIVATE CUDA::cudart CUDA::cuda_driver)
+
     # Native Client Links
     target_include_directories(native-client PRIVATE ${CUDAToolkit_INCLUDE_DIRS})
-    target_link_libraries(native-client PRIVATE CUDA::cudart)
+    target_link_libraries(native-client PRIVATE CUDA::cudart CUDA::cuda_driver)
 endif()
 
 if(LIBVA_FOUND)

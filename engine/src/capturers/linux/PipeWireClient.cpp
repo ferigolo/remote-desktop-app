@@ -4,6 +4,10 @@
 #include <spa/pod/vararg.h>
 #include <unistd.h>
 
+#ifdef HAVE_EGL
+#include "../../utils/linux/OpenGlUtils.hpp"
+#endif
+
 PipeWireClient::PipeWireClient() {
   pw_init(nullptr, nullptr);
   std::println("[PipeWireClient] Library initialized");
@@ -78,22 +82,76 @@ void PipeWireClient::configureStream() {
   pw_stream_add_listener(stream, &streamListener, &streamEvents, this);
 }
 
+std::vector<uint64_t> PipeWireClient::getModifiers() {
+  std::vector<uint64_t> modifiers;
+
+#ifdef HAVE_EGL
+  auto eglDisplay = OpenGlUtils::getEglDisplay();
+  if (eglDisplay != EGL_NO_DISPLAY) {
+    modifiers =
+        OpenGlUtils::getSupportedModifiers(eglDisplay, DRM_FORMAT_XRGB8888);
+  }
+#elifdef HAVE_VULKAN
+  // TODO: Add Vulkan equivalent logic here if modifiers are still empty
+#endif
+
+  return modifiers;
+}
+
 void PipeWireClient::negotiateFormat(uint32_t node_id) {
+  auto modifiers = getModifiers();
   uint8_t buffer[1024];
   spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
 
-  const struct spa_pod* params[1];
-  params[0] = (spa_pod*)spa_pod_builder_add_object(
-      &b, SPA_TYPE_OBJECT_Format, SPA_PARAM_EnumFormat, SPA_FORMAT_mediaType,
-      SPA_POD_Id(SPA_MEDIA_TYPE_video), SPA_FORMAT_mediaSubtype,
-      SPA_POD_Id(SPA_MEDIA_SUBTYPE_raw), SPA_FORMAT_VIDEO_format,
-      SPA_POD_CHOICE_ENUM_Id(4, SPA_VIDEO_FORMAT_RGBx, SPA_VIDEO_FORMAT_RGBx,
-                             SPA_VIDEO_FORMAT_RGBA, SPA_VIDEO_FORMAT_BGRx));
+  spa_pod_frame f[2];
+  // Start Object
+  spa_pod_builder_push_object(&b, &f[0], SPA_TYPE_OBJECT_Format,
+                              SPA_PARAM_EnumFormat);
+
+  spa_pod_builder_add(
+      &b, SPA_FORMAT_mediaType, SPA_POD_Id(SPA_MEDIA_TYPE_video),
+      SPA_FORMAT_mediaSubtype, SPA_POD_Id(SPA_MEDIA_SUBTYPE_raw),
+      SPA_FORMAT_VIDEO_format,
+      SPA_POD_CHOICE_ENUM_Id(5, SPA_VIDEO_FORMAT_BGRx, SPA_VIDEO_FORMAT_BGRx,
+                             SPA_VIDEO_FORMAT_RGBx, SPA_VIDEO_FORMAT_BGRA,
+                             SPA_VIDEO_FORMAT_RGBA),
+      0);
+
+  spa_pod_builder_prop(
+      &b, SPA_FORMAT_VIDEO_modifier,
+      SPA_POD_PROP_FLAG_MANDATORY | SPA_POD_PROP_FLAG_DONT_FIXATE);
+  spa_pod_builder_push_choice(&b, &f[1], SPA_CHOICE_Enum, 0);
+
+  // First item must be the preferred choice
+  spa_pod_builder_long(&b, modifiers[0]);
+  // Then list all choices (including the preferred one again)
+  for (auto mod : modifiers) spa_pod_builder_long(&b, mod);
+
+  spa_pod_builder_pop(&b, &f[1]);
+
+  // End Object 1 (DMA-BUF Linear)
+  const spa_pod* param =
+      static_cast<const spa_pod*>(spa_pod_builder_pop(&b, &f[0]));
+
+  // Start Object 2 (MemFd Fallback without Modifiers)
+  spa_pod_builder_push_object(&b, &f[0], SPA_TYPE_OBJECT_Format,
+                              SPA_PARAM_EnumFormat);
+  spa_pod_builder_add(
+      &b, SPA_FORMAT_mediaType, SPA_POD_Id(SPA_MEDIA_TYPE_video),
+      SPA_FORMAT_mediaSubtype, SPA_POD_Id(SPA_MEDIA_SUBTYPE_raw),
+      SPA_FORMAT_VIDEO_format,
+      SPA_POD_CHOICE_ENUM_Id(5, SPA_VIDEO_FORMAT_BGRx, SPA_VIDEO_FORMAT_BGRx,
+                             SPA_VIDEO_FORMAT_RGBx, SPA_VIDEO_FORMAT_BGRA,
+                             SPA_VIDEO_FORMAT_RGBA),
+      0);
+  const spa_pod* param2 =
+      static_cast<const spa_pod*>(spa_pod_builder_pop(&b, &f[0]));
+
+  const struct spa_pod* params[2] = {param, param2};
 
   // Connecting to the stream.
   pw_stream_connect(stream, PW_DIRECTION_INPUT, node_id,
-                    (enum pw_stream_flags)(PW_STREAM_FLAG_AUTOCONNECT), params,
-                    1);
+                    PW_STREAM_FLAG_AUTOCONNECT, params, 2);
 }
 
 void PipeWireClient::onConfigureEnd() {
@@ -133,12 +191,18 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
                                           const char* error) {
   constexpr auto state_name = [](pw_stream_state s) {
     switch (s) {
-      case PW_STREAM_STATE_ERROR: return "ERROR";
-      case PW_STREAM_STATE_UNCONNECTED: return "UNCONNECTED";
-      case PW_STREAM_STATE_CONNECTING: return "CONNECTING";
-      case PW_STREAM_STATE_PAUSED: return "PAUSED";
-      case PW_STREAM_STATE_STREAMING: return "STREAMING";
-      default: return "UNKNOWN";
+      case PW_STREAM_STATE_ERROR:
+        return "ERROR";
+      case PW_STREAM_STATE_UNCONNECTED:
+        return "UNCONNECTED";
+      case PW_STREAM_STATE_CONNECTING:
+        return "CONNECTING";
+      case PW_STREAM_STATE_PAUSED:
+        return "PAUSED";
+      case PW_STREAM_STATE_STREAMING:
+        return "STREAMING";
+      default:
+        return "UNKNOWN";
     }
   };
   std::println("🌊 [PipeWire] Stream state changed: {} -> {}",
@@ -146,8 +210,7 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
 
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
 
-  if (state == PW_STREAM_STATE_PAUSED)
-    pw_stream_set_active(self->stream, true);
+  if (state == PW_STREAM_STATE_PAUSED) pw_stream_set_active(self->stream, true);
   if (state == PW_STREAM_STATE_ERROR && self->context != nullptr)
     std::println(stderr, "❌ [PipeWire] Error at Stream: {}",
                  error ? error : "Unknown");
@@ -159,8 +222,12 @@ void PipeWireClient::onStreamStateChanged(void* data, pw_stream_state old_state,
 void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                                           const spa_pod* param) {
   PipeWireClient* self = static_cast<PipeWireClient*>(data);
-  std::println("🔍 [PipeWireClient] onStreamParamChanged called with id: {}, param is null: {}", id, param == nullptr);
+  std::println(
+      "🔍 [PipeWireClient] onStreamParamChanged called with id: {}, param is "
+      "null: {}",
+      id, param == nullptr);
 
+  // We only care about the Format parameter
   if (param == nullptr || id != SPA_PARAM_Format) return;
 
   struct spa_video_info_raw info;
@@ -177,21 +244,27 @@ void PipeWireClient::onStreamParamChanged(void* data, uint32_t id,
                   ? info.framerate.num / info.framerate.denom
                   : 144;
   self->drmModifier = info.modifier;
-  std::println("🔍 [PipeWireClient] Negotiated format: {}x{} at {}fps, modifier: {}", self->width, self->height, self->fps, self->drmModifier);
+  std::println(
+      "🔍 [PipeWireClient] Negotiated format: {}x{} at {}fps, modifier: {}",
+      self->width, self->height, self->fps, self->drmModifier);
 
   uint8_t buffer[1024];
   spa_pod_builder b = SPA_POD_BUILDER_INIT(buffer, sizeof(buffer));
-  const struct spa_pod* params[4];
 
-  params[0] = (spa_pod*)spa_pod_builder_add_object(
+  const struct spa_pod* params[1];
+  // Explicitly request DMA-BUF from the allocator now that formats are fixed
+  params[0] = static_cast<spa_pod*>(spa_pod_builder_add_object(
       &b, SPA_TYPE_OBJECT_ParamBuffers, SPA_PARAM_Buffers,
       SPA_PARAM_BUFFERS_buffers, SPA_POD_CHOICE_RANGE_Int(8, 2, 32),
-      SPA_PARAM_BUFFERS_blocks, SPA_POD_Int(1), SPA_PARAM_BUFFERS_size,
-      SPA_POD_Int(self->width * self->height * 4), SPA_PARAM_BUFFERS_stride,
-      SPA_POD_Int(self->width * 4), SPA_PARAM_BUFFERS_dataType,
-      SPA_POD_CHOICE_FLAGS_Int((1 << SPA_DATA_DmaBuf) | (1 << SPA_DATA_MemFd) |
-                               (1 << SPA_DATA_MemPtr)));
-
+      SPA_PARAM_BUFFERS_blocks, SPA_POD_CHOICE_RANGE_Int(1, 1, 4),
+      SPA_PARAM_BUFFERS_size,
+      SPA_POD_CHOICE_RANGE_Int(self->width * self->height * 4,
+                               self->width * self->height * 4, INT32_MAX),
+      SPA_PARAM_BUFFERS_stride,
+      SPA_POD_CHOICE_RANGE_Int(self->width * 4, self->width * 4, INT32_MAX),
+      SPA_PARAM_BUFFERS_dataType,
+      SPA_POD_CHOICE_FLAGS_Int((1 << SPA_DATA_DmaBuf))));  // Supported Option 2
+  // Send the acceptance back to PipeWire
   pw_stream_update_params(self->stream, params, 1);
   pw_stream_set_active(self->stream, true);
 }
@@ -213,6 +286,8 @@ void PipeWireClient::onStreamProcess(void* data) {
       .spaFormat = self->format,
       .drmModifier = self->drmModifier};
 
+  frame.size = buf->datas[0].maxsize;
+
   if (buf->datas[0].chunk->size == 0) {
     pw_stream_queue_buffer(self->stream, b);
     return;
@@ -232,8 +307,9 @@ void PipeWireClient::onStreamProcess(void* data) {
       frame.size = buf->datas[0].chunk->size;
       break;
     default:
-      std::println("⚠️ [PipeWireClient] Unknown frame memory type: {}", buf->datas[0].type);
-      frame.type = FrameMemoryType::MemFd; // fallback
+      std::println("⚠️ [PipeWireClient] Unknown frame memory type: {}",
+                   buf->datas[0].type);
+      frame.type = FrameMemoryType::MemFd;  // fallback
       break;
   }
 
@@ -241,19 +317,19 @@ void PipeWireClient::onStreamProcess(void* data) {
     static int frameCount = 0;
     frameCount++;
     if (frameCount == 1 || frameCount % frame.fps == 0) {
-      std::println("🔍 [PipeWireClient] (Frame {}) Captured DmaBuf frame and sending to BaseEncoder...", frameCount);
+      std::println(
+          "🔍 [PipeWireClient] (Frame {}) Captured DmaBuf frame and sending to "
+          "BaseEncoder...",
+          frameCount);
     }
   } else if (frame.type == FrameMemoryType::MemFd) {
     static int frameCountMemFd = 0;
     frameCountMemFd++;
     if (frameCountMemFd == 1 || frameCountMemFd % frame.fps == 0) {
-      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemFd frame and sending to BaseEncoder...", frameCountMemFd);
-    }
-  } else if (frame.type == FrameMemoryType::MemPtr) {
-    static int frameCountMemPtr = 0;
-    frameCountMemPtr++;
-    if (frameCountMemPtr == 1 || frameCountMemPtr % frame.fps == 0) {
-      std::println("🔍 [PipeWireClient] (Frame {}) Captured MemPtr frame and sending to BaseEncoder...", frameCountMemPtr);
+      std::println(
+          "🔍 [PipeWireClient] (Frame {}) Captured MemFd frame and sending to "
+          "BaseEncoder...",
+          frameCountMemFd);
     }
   }
 

@@ -24,6 +24,7 @@ class PipeWireClient {
   bool startLoop();
   bool configureCore();
   void configureStream();
+  std::vector<uint64_t> getModifiers();
   void negotiateFormat(uint32_t node_id);
   void onConfigureEnd();
 

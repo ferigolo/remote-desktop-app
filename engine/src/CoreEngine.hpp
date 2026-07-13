@@ -22,7 +22,7 @@ class CoreEngine {
  private:
   SDL_Window* window;
   SDL_Renderer* renderer;
-  std::atomic<bool> is_running;
+  std::atomic<bool> isRunning;
   std::unique_ptr<BaseEncoder> encoder;
   std::unique_ptr<ScreenCapturer> capturer;
   std::unique_ptr<WebRtcManager> webRtcManager;

@@ -5,10 +5,8 @@
 
 namespace PlatformUtils
 {
-    void printGPUName(SDL_Renderer *renderer, const char *backendName)
+    void printGPUName(SDL_Renderer */*renderer*/, const char *backendName)
     {
-        (void)renderer; // To avoid unused parameter warnings
-
         std::string_view backend(backendName);
         if (backend == "opengl")
         {

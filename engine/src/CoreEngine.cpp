@@ -13,7 +13,7 @@
 #endif
 
 CoreEngine::CoreEngine()
-    : window(nullptr), renderer(nullptr), is_running(false) {}
+    : window(nullptr), renderer(nullptr), isRunning(false) {}
 
 CoreEngine::~CoreEngine() { cleanup(); }
 
@@ -25,7 +25,8 @@ bool CoreEngine::initialize() {
 #ifdef HAVE_CUDA
   encoder = std::make_unique<CudaEncoder>(nullptr);
 #else
-  std::println(stderr, "❌ [Core] No hardware encoder available on this system!");
+  std::println(stderr,
+               "❌ [Core] No hardware encoder available on this system!");
   // Throwing an exception or initializing a software encoder would go here
 #endif
 
@@ -33,7 +34,7 @@ bool CoreEngine::initialize() {
   capturer->start(
       [this](const VideoFrame& frame) { handleIncomingFrame(frame); });
 
-  is_running = true;
+  isRunning = true;
   renderLoop();
 
   return true;
@@ -51,7 +52,7 @@ void CoreEngine::handleIncomingFrame(const VideoFrame& frame) {
 
   if (frame.type == FrameMemoryType::DmaBuf)
     encoder->encode(frame.fd, frame.width, frame.height, frame.stride,
-                    frame.drmModifier, frame.spaFormat);
+                    frame.drmModifier, frame.spaFormat, frame.size);
   else
     encoder->encode(frame.fd, frame.width, frame.height, frame.stride,
                     frame.spaFormat);
@@ -67,8 +68,7 @@ void CoreEngine::initializeWebRtcManager() {
 }
 
 void CoreEngine::renderLoop() {
-  while (is_running)
-    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+  while (isRunning) std::this_thread::sleep_for(std::chrono::milliseconds(100));
 }
 
 void CoreEngine::cleanup() {
