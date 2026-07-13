@@ -5,13 +5,16 @@
 
 enum class FrameMemoryType {
   DmaBuf,  // Memory directly on VRAM (GPU)
-  MemFd    // Memory shared on RAM (CPU)
+  MemFd,   // Memory shared on RAM (CPU) via fd
+  MemPtr   // Memory shared on RAM (CPU) via direct pointer
 };
 
 struct VideoFrame {
   FrameMemoryType type;
 
   int fd;
+  uint8_t* data = nullptr; // Used for MemPtr
+  uint32_t size = 0;       // Used for MemPtr
   uint32_t width;
   uint32_t height;
   uint32_t stride;  // Line width in bytes

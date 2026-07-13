@@ -31,13 +31,14 @@ bool IntelIrisEncoder::initialize(int width, int height, int fps, int bitrate) {
   framesCtx = (AVHWFramesContext*)(hwFramesRef->data);
 
   // Define the hardware frame properties
-  framesCtx->format = AV_PIX_FMT_QSV;  // The hardware surface format
-  framesCtx->sw_format =
-      AV_PIX_FMT_NV12;  // The underlying software format QSV uses
+  // The hardware surface format
+  framesCtx->format = AV_PIX_FMT_QSV;
+  // The underlying software format QSV uses
+  framesCtx->sw_format = AV_PIX_FMT_NV12;
   framesCtx->width = codecCtx->width;
   framesCtx->height = codecCtx->height;
-  framesCtx->initial_pool_size =
-      32;  // Number of frames to pre-allocate in VRAM
+  // Number of frames to pre-allocate in VRAM
+  framesCtx->initial_pool_size = 32;
 
   if (int ret = av_hwframe_ctx_init(hwFramesRef); ret < 0)
     return printAvErrorAndReturn(ret, "Failed initializing frames context");
@@ -85,7 +86,6 @@ AVFrame* IntelIrisEncoder::createDrmFrame(int fd, int width, int height,
   layer.planes[0].pitch = stride;
 
   drmFrame->data[0] = (uint8_t*)desc;
-
   drmFrame->buf[0] =
       av_buffer_create((uint8_t*)desc, sizeof(*desc),
                        [](void*, uint8_t* data) { av_free(data); }, nullptr, 0);

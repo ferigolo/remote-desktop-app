@@ -1,7 +1,5 @@
 #include "CoreEngine.hpp"
 
-#include <SDL3/SDL.h>
-
 #include <cmath>
 #include <print>
 #include <string_view>
@@ -83,4 +81,14 @@ void CoreEngine::cleanup() {
   if (webRtcManager) webRtcManager.reset();
 
   std::println("🧹 [Core] Released all resources");
+}
+
+void CoreEngine::printRendererInfo() const {
+#ifndef NDEBUG
+  if (!renderer) return;
+
+  const char* backendName = SDL_GetRendererName(renderer);
+  std::println(" [Core] Using {} backend", backendName);
+  PlatformUtils::printGPUName(renderer, backendName);
+#endif
 }

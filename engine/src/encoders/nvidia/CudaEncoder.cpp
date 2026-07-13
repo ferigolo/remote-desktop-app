@@ -159,7 +159,6 @@ void CudaEncoder::encode(int fd, int width, int height, int stride,
                    "❌ [CudaEncoder] Failed to upload NV12 frame to CUDA");
     else
       processPacket(hwFrame);
-
     av_frame_free(&hwFrame);
   }
 

@@ -156,6 +156,7 @@ install(TARGETS core-engine DESTINATION bin)
 set(CLIENT_SOURCE_FILES
     src/client/main.cpp
     src/client/ClientApp.cpp
+    src/client/Renderer.cpp
     src/client/network/ClientWebRtcManager.cpp
     src/client/decoders/software/SoftwareDecoder.cpp
     src/client/decoders/DecoderFactory.cpp 
@@ -170,6 +171,14 @@ target_link_libraries(native-client PRIVATE
     datachannel 
     nlohmann_json::nlohmann_json
 )
+
+if(CUDAToolkit_FOUND)                                                              
+    message(STATUS "🟢 Enabling CUDA Decoder for client...")   
+    list(APPEND CLIENT_SOURCE_FILES src/client/decoders/nvidia/CudaDecoder.cpp)    
+    target_include_directories(native-client PRIVATE ${CUDAToolkit_INCLUDE_DIRS})  
+    target_compile_definitions(native-client PRIVATE HAVE_CUDA)
+    target_link_libraries(native-client PRIVATE CUDA::cudart)
+endif()    
 
 if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_link_libraries(native-client PRIVATE ${FFMPEG_LIBRARIES})

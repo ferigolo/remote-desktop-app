@@ -7,6 +7,11 @@ using json = nlohmann::json;
 WebRtcManager::WebRtcManager() { rtc::InitLogger(rtc::LogLevel::Info); }
 
 WebRtcManager::~WebRtcManager() {
+  {
+    std::lock_guard<std::mutex> lock(trackMutex);
+    stopWaiting = true;
+    trackCv.notify_all();
+  }
   if (dataChannel) dataChannel->close();
   if (pc) pc->close();
   if (ws) ws->close();
@@ -82,6 +87,20 @@ void WebRtcManager::initializeVideoTrack() {
   videoMedia.addSSRC(ssrc, cname);
   videoTrack = pc->addTrack(videoMedia);
 
+  videoTrack->onOpen([this]() {
+    std::println("✅ [WebRtcManager] Video Track Opened!");
+    std::lock_guard<std::mutex> lock(trackMutex);
+    isVideoTrackOpen = true;
+    trackCv.notify_all();
+  });
+
+  videoTrack->onClosed([this]() {
+    std::println("❌ [WebRtcManager] Video Track Closed!");
+    std::lock_guard<std::mutex> lock(trackMutex);
+    isVideoTrackOpen = false;
+    trackCv.notify_all();
+  });
+
   this->rtpConfig = std::make_shared<rtc::RtpPacketizationConfig>(
       ssrc, cname, payloadType, rtc::H264RtpPacketizer::ClockRate);
 
@@ -104,11 +123,15 @@ void WebRtcManager::setVideoFps(uint32_t fps) {
 }
 
 void WebRtcManager::sendVideoPacket(const uint8_t* data, size_t size) {
-  if (!(videoTrack && videoTrack->isOpen())) {
-    std::println(
-        "⏳ [WebRtcManager] videoTrack not open yet, dropping packet...");
-    return;
+  {
+    std::unique_lock<std::mutex> lock(trackMutex);
+    if (!isVideoTrackOpen) {
+      std::println("⏳ [WebRtcManager] videoTrack not open yet, waiting...");
+      trackCv.wait(lock, [this]() { return isVideoTrackOpen || stopWaiting; });
+    }
   }
+
+  if (stopWaiting || !videoTrack || !videoTrack->isOpen()) return;
 
   if (this->rtpConfig) this->rtpConfig->timestamp += (90000 / this->videoFps);
 
@@ -137,7 +160,7 @@ void WebRtcManager::connectSignaling(const std::string& url) {
     if (!std::holds_alternative<rtc::string>(data)) return;
 
     std::string msg = std::get<rtc::string>(data);
-    std::println("📩 [WebRtcManager] Received message: {}", msg);
+    // std::println("📩 [WebRtcManager] Received message: {}", msg);
 
     auto parsedJson = json::parse(msg);
     SignalingMessageType type = parsedJson["type"].get<SignalingMessageType>();

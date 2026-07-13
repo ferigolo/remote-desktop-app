@@ -11,6 +11,7 @@ extern "C" {
 #include <libavutil/frame.h>
 #include <libavutil/imgutils.h>
 #include <libswscale/swscale.h>
+#include <SDL3/SDL_render.h>
 }
 
 // Instead of the VRAM -> RAM -> VRAM roundtrip, the pixels stay locked in the
@@ -22,18 +23,16 @@ class BaseDecoder {
 
   virtual bool initialize() = 0;
   virtual void decode(const uint8_t* data, size_t size) = 0;
-  // std::function<void(const uint8_t* rgbaData, int width, int height, int
-  // pitch)>
-  //     onFrameDecoded;
-  std::function<void(const uint8_t* yPlane, int yPitch, const uint8_t* uvPlane,
-                     int uvPitch, int width, int height)>
-      onFrameDecoded;
+  std::function<void(AVFrame* frame)> onFrameDecoded;
+
+  // The app calls this in its render loop to let the decoder update the texture optimally 
+  virtual void updateTexture(SDL_Renderer* renderer,
+                                       SDL_Texture** texture) = 0;
 
  protected:
+  AVCodecContext* codecCtx{};
   bool isInitialized = false;
   bool hasDecodedFirstFrame = false;
-
-  AVCodecContext* codecCtx{};
 
   bool printAvErrorAndReturn(std::string_view contextMessage) {
     std::println(std::cerr, "❌ [Decoder] {} ", contextMessage);

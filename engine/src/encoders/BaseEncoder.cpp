@@ -8,8 +8,13 @@ void BaseEncoder::processPacket(const AVFrame* frame) {
   avcodec_send_frame(codecCtx, frame);
 
   AVPacket* pkt = av_packet_alloc();
-  int ret;
-  while ((ret = avcodec_receive_packet(codecCtx, pkt)) >= 0) {
+  while (int ret = avcodec_receive_packet(codecCtx, pkt) >= 0) {
+    if (ret == AVERROR(EAGAIN) || ret == AVERROR_EOF)
+      break;
+    else if (ret < 0) {
+      printAvErrorAndReturn(ret, "Failed to process packet");
+      break;
+    }
     if (onEncodedPacketCallback) onEncodedPacketCallback(pkt);
     av_packet_unref(pkt);
   }

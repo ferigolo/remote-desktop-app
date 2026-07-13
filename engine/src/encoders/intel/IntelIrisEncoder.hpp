@@ -14,6 +14,7 @@ class IntelIrisEncoder : public BaseEncoder {
 
   bool initialize(int width, int height, int fps = 60,
                   int bitrate = 50000000) override;
+
   void encode(int fd, int width, int height, int stride, uint64_t modifier,
               uint32_t spaFormat) override;
   void encode(int fd, int width, int height, int stride,

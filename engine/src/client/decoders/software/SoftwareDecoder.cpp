@@ -98,10 +98,14 @@ void SoftwareDecoder::decode(const uint8_t* data, size_t size) {
             frameCount, frame->width, frame->height);
       }
 
-      if (onFrameDecoded)
-        onFrameDecoded(swFrame->data[0], swFrame->linesize[0], swFrame->data[1],
-                       swFrame->linesize[1], swFrame->width, swFrame->height);
+      if (onFrameDecoded) onFrameDecoded(swFrame);
     }
   }
   av_packet_free(&pkt);
+}
+
+void SoftwareDecoder::updateTexture(SDL_Renderer* renderer, SDL_Texture** texture) {
+  // Texture updates are handled by Renderer for software decoding
+  (void)renderer;
+  (void)texture;
 }
